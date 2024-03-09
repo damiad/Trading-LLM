@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from models import TimeLLM, TimeLLMSpecial
+from models import TimeLLM, TradingLLM
 
 from data_provider.data_factory import data_provider
 import time
@@ -32,8 +32,8 @@ parser.add_argument('--task_name', type=str, required=True, default='long_term_f
 parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
 parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
 parser.add_argument('--model_comment', type=str, required=True, default='none', help='prefix when saving test results')
-parser.add_argument('--model', type=str, required=True, default='Autoformer',
-                    help='model name, options: [Autoformer, DLinear]')
+parser.add_argument('--model', type=str, required=True, default='TimeLLM',
+                    help='model name, options: [TimeLLM, TradingLLM]')
 parser.add_argument('--seed', type=int, default=2021, help='random seed')
 
 # data loader
@@ -125,8 +125,8 @@ for ii in range(args.itr):
     vali_data, vali_loader = data_provider(args, 'val')
     test_data, test_loader = data_provider(args, 'test')
 
-    if args.model == 'TimeLLM-special':
-        model = TimeLLMSpecial.Model(args).float()
+    if args.model == 'TradingLLM':
+        model = TradingLLM.Model(args).float()
     else:
         model = TimeLLM.Model(args).float()
 
