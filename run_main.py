@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from models import Autoformer, DLinear, TimeLLM
+from models import TimeLLM, TimeLLMSpecial
 
 from data_provider.data_factory import data_provider
 import time
@@ -100,7 +100,7 @@ ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
-file = open("logs/example.txt", 'w')
+# file = open("logs/example.txt", 'w')
 for ii in range(args.itr):
     # setting record of experiments
     setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
@@ -125,10 +125,8 @@ for ii in range(args.itr):
     vali_data, vali_loader = data_provider(args, 'val')
     test_data, test_loader = data_provider(args, 'test')
 
-    if args.model == 'Autoformer':
-        model = Autoformer.Model(args).float()
-    elif args.model == 'DLinear':
-        model = DLinear.Model(args).float()
+    if args.model == 'TimeLLM-special':
+        model = TimeLLMSpecial.Model(args).float()
     else:
         model = TimeLLM.Model(args).float()
 
@@ -216,11 +214,11 @@ for ii in range(args.itr):
             
 
             if (i + 1) % 100 == 0:
-                file.write(
-                    "\titers: {0}, epoch: {1} | loss: {2:.7f}\n".format(i + 1, epoch + 1, loss.item()))
-                file.flush() 
-                accelerator.print(
-                    "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
+                # file.write(
+                #     "\titers: {0}, epoch: {1} | loss: {2:.7f}\n".format(i + 1, epoch + 1, loss.item()))
+                # file.flush() 
+                # accelerator.print(
+                #     "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                 # print(
                 #     "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                 speed = (time.time() - time_now) / iter_count
