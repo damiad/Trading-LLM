@@ -14,8 +14,8 @@ def get_args():
     parser.add_argument('--seed', type=int, default=2021, help='random seed')
 
     # data loader
-    parser.add_argument('--data_pretrain', type=str, required=False, default='ETTm1', help='dataset type') # Only for pretrain dataloader
-    parser.add_argument('--data_path_pretrain', type=str, default='ETTh1.csv', help='data file') # Only for pretrain dataloader
+    parser.add_argument('--data_pretrain', type=str, required=False, default='', help='dataset type') # Only for pretrain dataloader
+    parser.add_argument('--data_path_pretrain', type=str, default='', help='data file') # Only for pretrain dataloader
     parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')
     parser.add_argument('--root_path', type=str, default='./dataset', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
