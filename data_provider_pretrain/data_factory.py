@@ -10,7 +10,7 @@ data_dict = {
 }
 
 
-def data_provider(args, data, data_path, pretrain=True, flag='train'):
+def pretrained_data_provider(args, data, data_path, pretrain=True, flag='train'):
     Data = data_dict[data]
     timeenc = 0 if args.embed != 'timeF' else 1
     percent = args.percent
