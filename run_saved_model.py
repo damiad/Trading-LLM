@@ -18,8 +18,6 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
 from utils.tools import vali, load_content
 from utils.config_parser import get_args
 
-parser = argparse.ArgumentParser(description='Time-LLM')
-
 fix_seed = 2021
 random.seed(fix_seed)
 torch.manual_seed(fix_seed)
