@@ -1,5 +1,5 @@
 <div align="center">
-  <h2><b> (ICLR'24) Trading-LLM: Trading Series Forecasting by Reprogramming Large Language Models </b></h2>
+  <h2><b> Trading-LLM: Trading Series Forecasting by Reprogramming Large Language Models </b></h2>
 </div>
 
 ---
