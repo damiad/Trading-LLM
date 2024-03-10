@@ -1,4 +1,3 @@
-import argparse
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
 from accelerate import DistributedDataParallelKwargs
