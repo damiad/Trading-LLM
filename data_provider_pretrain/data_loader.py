@@ -161,6 +161,7 @@ class Dataset_ETT_hour(Dataset):
         else:
             border1s = [0, 12 * 30 * 24 - self.seq_len, 12 * 30 * 24 + 4 * 30 * 24 - self.seq_len]
             border2s = [12 * 30 * 24, 12 * 30 * 24 + 4 * 30 * 24, 12 * 30 * 24 + 8 * 30 * 24]
+            
 
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
