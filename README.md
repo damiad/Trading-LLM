@@ -1,35 +1,6 @@
 <div align="center">
-  <!-- <h1><b> Trading-LLM </b></h1> -->
-  <!-- <h2><b> Trading-LLM </b></h2> -->
   <h2><b> (ICLR'24) Trading-LLM: Trading Series Forecasting by Reprogramming Large Language Models </b></h2>
 </div>
-
-<div align="center">
-
-![](https://img.shields.io/github/last-commit/damiad/Trading-LLM?color=green)
-![](https://img.shields.io/github/stars/damiad/Trading-LLM?color=yellow)
-![](https://img.shields.io/github/forks/damiad/Trading-LLM?color=lightblue)
-![](https://img.shields.io/badge/PRs-Welcome-green)
-
-</div>
-
-<div align="center">
-
-**[<a href="https://arxiv.org/abs/2310.01728">Paper Page</a>]**
-**[<a href="https://www.youtube.com/watch?v=L-hRexVa32k&t=160s">Paper Explained</a>]**
-**[<a href="https://mp.weixin.qq.com/s/FSxUdvPI713J2LiHnNaFCw">中文解读1</a>]**
-**[<a href="https://mp.weixin.qq.com/s/nUiQGnHOkWznoBPqM0KHXg">中文解读2</a>]**
-**[<a href="https://zhuanlan.zhihu.com/p/676256783">中文解读3</a>]**
-**[<a href="https://mp.weixin.qq.com/s/ZnR33epXCB7N5Y_kO0YJ_w">中文解读4</a>]**
-
-
-</div>
-
-<p align="center">
-
-<img src="./figures/logo.png" width="60">
-
-</p>
 
 ---
 >
@@ -38,12 +9,8 @@
 > 🌟 If you find this resource helpful, please consider to star this repository and cite our research:
 
 ```
-@inproceedings{jin2023time,
-  title={{Time-LLM}: Time series forecasting by reprogramming large language models},
-  author={Jin, Ming and Wang, Shiyu and Ma, Lintao and Chu, Zhixuan and Zhang, James Y and Shi, Xiaoming and Chen, Pin-Yu and Liang, Yuxuan and Li, Yuan-Fang and Pan, Shirui and Wen, Qingsong},
-  booktitle={International Conference on Learning Representations (ICLR)},
+  authors={Damian Dąbrowski, Ivan Gechu, Heorhii Lopatin, Krzysztof Szostek},
   year={2024}
-}
 ```
 
 ## Introduction
@@ -73,6 +40,10 @@ Notably, we show that time series analysis (e.g., forecasting) can be cast as ye
 - peft==0.4.0
 - transformers==4.31.0
 - deepspeed==0.13.0
+- bitsandbytes
+- datasets
+- sentencepiece
+- mpi4py
 
 To install all dependencies:
 ```
@@ -80,7 +51,7 @@ pip install -r requirements.txt
 ```
 
 ## Datasets
-You can access the well pre-processed datasets from [[Google Drive]](https://drive.google.com/file/d/1NF7VEefXCmXuWNbnNe858WvQAkJ_7wuP/view?usp=sharing), then place the downloaded contents under `./dataset`
+You can access the well pre-processed datasets from [[Google Drive]](LINK_LATER), then place the downloaded contents under `./dataset`
 
 ## Quick Demos
 1. Download datasets and place them under `./dataset`
@@ -101,7 +72,7 @@ bash ./scripts/TimeLLM_ETTm2.sh
 
 ## Detailed usage
 
-Please refer to ```run_main.py``` and ```run_m4.py``` for the detailed description of each hyperparameter.
+Please refer to ```run_main.py``` for the detailed description of each hyperparameter.
 
 
 ## Further Reading
