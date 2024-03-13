@@ -210,7 +210,7 @@ class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h', percent=100,
-                 seasonal_patterns=None, to_remove=[], date_col='date'):
+                 seasonal_patterns=None, to_remove=[], date_col='date', do_shift=False):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -230,6 +230,7 @@ class Dataset_Custom(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.percent = percent
+        self.do_shift = do_shift
 
         #change here
         self.to_remove = to_remove
@@ -257,6 +258,10 @@ class Dataset_Custom(Dataset):
         # column_names.insert(0, 'date')
         # column_names.append(self.target)
         # df_raw = df_raw[column_names]
+
+        if self.do_shift:
+            df_raw[self.target] = df_raw[self.target].shift(1)
+        df_raw.dropna(inplace=True)
         ##
 
         '''
@@ -334,5 +339,5 @@ class Dataset_GBPCAD_hour(Dataset_Custom):
                  seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp'], date_col='barTimestamp'):
         
         super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent, 
-                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col)
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)
 
