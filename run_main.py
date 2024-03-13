@@ -14,6 +14,8 @@ import time
 import random
 import numpy as np
 import os
+import sys
+import json
 
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
@@ -33,6 +35,7 @@ torch.manual_seed(fix_seed)
 np.random.seed(fix_seed)
 
 args = get_args()
+
 
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config="./ds_config_zero2.json")
@@ -86,6 +89,10 @@ for ii in range(args.itr):
     path = os.path.join(
         args.checkpoints, setting + "-" + args.model_comment
     )  # unique checkpoint saving path
+    with open(path + '/' + 'args', 'w+') as f:
+         # f.write('\n'.join(sys.argv[1:]))
+        json.dump(args.__dict__, f, indent=2)
+
     args.content = load_content(args)
     if not os.path.exists(path) and accelerator.is_local_main_process:
         os.makedirs(path)
