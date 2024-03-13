@@ -16,6 +16,7 @@ import numpy as np
 import os
 import sys
 import json
+import csv
 
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
@@ -92,6 +93,13 @@ for ii in range(args.itr):
     with open(path + '/' + 'args', 'w+') as f:
          # f.write('\n'.join(sys.argv[1:]))
         json.dump(args.__dict__, f, indent=2)
+    
+    res_header = ["Epoch", "Cost", "TrainLoss", "ValiLoss", "TestLoss", "MAELoss"]
+
+    csvres = open(path+'/results.csv', 'w+')
+    reswriter = csv.writer(csvres)
+    reswriter.writerow(res_header)
+
 
     args.content = load_content(args)
     if not os.path.exists(path) and accelerator.is_local_main_process:
@@ -209,6 +217,7 @@ for ii in range(args.itr):
                 iter_count = 0
                 time_now = time.time()
 
+
             if args.use_amp:
                 scaler.scale(loss).backward()
                 scaler.step(model_optim)
@@ -238,6 +247,8 @@ for ii in range(args.itr):
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss
             )
         )
+        reswriter.writerow([epoch+1, time.time() - epoch_time, train_loss, vali_loss, test_loss, test_mae_loss])
+        csvres.flush()
 
         early_stopping(vali_loss, model, path)
         if early_stopping.early_stop:
@@ -266,8 +277,10 @@ for ii in range(args.itr):
             )
 
 accelerator.wait_for_everyone()
+
 if accelerator.is_local_main_process:
     path = "./checkpoints"  # unique checkpoint saving path
     # del_files(path)  # delete checkpoint files
     accelerator.print("success delete checkpoints")
 # file.close()
+    csvres.close()
