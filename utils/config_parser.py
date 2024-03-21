@@ -5,8 +5,6 @@ def get_args():
     parser = argparse.ArgumentParser(description='Time-LLM')
 
     # basic config
-    parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
-                        help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
     parser.add_argument('--model_id', type=str, required=True,
                         default='test', help='model id')
     parser.add_argument('--model_comment', type=str, required=True,

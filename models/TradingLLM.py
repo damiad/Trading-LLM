@@ -11,6 +11,8 @@ import transformers
 from layers.StandardNorm import Normalize
 
 transformers.logging.set_verbosity_error()
+from os.path import join
+base_model_path = "/home/heorhii/zpp/Trading-LLM/llama-7b"
 
 
 class FlattenHead(nn.Module):
@@ -32,7 +34,6 @@ class Model(nn.Module):
 
     def __init__(self, configs, patch_len=16, stride=8):
         super(Model, self).__init__()
-        self.task_name = configs.task_name
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
@@ -41,16 +42,12 @@ class Model(nn.Module):
         self.patch_len = configs.patch_len
         self.stride = configs.stride
 
-        # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
-        self.llama_config = LlamaConfig.from_pretrained('/home/heorhii/zpp/Trading-LLM/llama-7b')
-        # self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
+        self.llama_config = LlamaConfig.from_pretrained(base_model_path)
         self.llama_config.num_hidden_layers = configs.llm_layers
         self.llama_config.output_attentions = True
         self.llama_config.output_hidden_states = True
         self.llama = LlamaModel.from_pretrained(
-            # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
-            "/home/heorhii/zpp/Trading-LLM/llama-7b",
-            # 'huggyllama/llama-7b',
+            base_model_path,
             trust_remote_code=True,
             local_files_only=True,
             config=self.llama_config,
@@ -58,9 +55,7 @@ class Model(nn.Module):
         )
 
         self.tokenizer = LlamaTokenizer.from_pretrained(
-            # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
-            "/home/heorhii/zpp/Trading-LLM/llama-7b/tokenizer.model",
-            # 'huggyllama/llama-7b',
+            join(base_model_path, "tokenizer.model"),
             trust_remote_code=True,
             local_files_only=True
         )
@@ -90,19 +85,14 @@ class Model(nn.Module):
         self.patch_nums = int((configs.seq_len - self.patch_len) / self.stride + 2)
         self.head_nf = self.d_ff * self.patch_nums
 
-        if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
-            self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len,
-                                                 head_dropout=configs.dropout)
-        else:
-            raise NotImplementedError
+        self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len, head_dropout=configs.dropout)
+
 
         self.normalize_layers = Normalize(configs.enc_in, affine=False)
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-        if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
-            dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-            return dec_out[:, -self.pred_len:, :]
-        return None
+        dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+        return dec_out[:, -self.pred_len:, :]
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
 

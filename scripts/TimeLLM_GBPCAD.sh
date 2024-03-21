@@ -1,4 +1,4 @@
-model_name=TimeLLM
+model_name=TradingLLM
 train_epochs=40
 learning_rate=0.01
 llama_layers=32
@@ -12,7 +12,6 @@ d_ff=128
 comment='TimeLLM-GBPCAD'
 
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
-	--task_name long_term_forecast \
 	--root_path ./dataset/ETT-small/ \
 	--data_path output.csv \
 	--model_id GBPCAD \

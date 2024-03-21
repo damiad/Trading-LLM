@@ -1,4 +1,4 @@
-model_name=TimeLLM
+model_name=TradingLLM
 train_epochs=40
 learning_rate=0.01
 llama_layers=32
@@ -15,7 +15,6 @@ model_path='./checkpoints/long_term_forecast_GBPCAD_TimeLLM_gbpcad_ftM_sl512_ll4
 # model_path='./checkpoints/ETTh1_512_96_TimeLLM-ETTh1/checkpoint.pth' # Update this path based on where your model is saved
 
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_saved_model.py \
-	--task_name long_term_forecast \
 	--root_path ./dataset/ETT-small/ \
 	--data_path output.csv \
 	--model_id GBPCAD \
