@@ -9,7 +9,6 @@ from utils.tools import (
 )
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
-from accelerate import DistributedDataParallelKwargs
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
@@ -59,10 +58,10 @@ for ii in range(args.itr):
         args.checkpoints, setting + "-" + args.model_comment
     )  # unique checkpoint saving path
 
+    # save model arguments
     if not os.path.exists(path):
         os.makedirs(path)
     with open(path + '/' + 'args', 'w+') as f:
-        # f.write('\n'.join(sys.argv[1:]))
         json.dump(args.__dict__, f, indent=2)
 
     res_header = ["Epoch", "Cost", "TrainLoss",
@@ -72,6 +71,7 @@ for ii in range(args.itr):
     reswriter = csv.writer(csvres)
     reswriter.writerow(res_header)
 
+    # load prompt to args.content
     args.content = load_content(args)
     if not os.path.exists(path) and accelerator.is_local_main_process:
         os.makedirs(path)
@@ -79,6 +79,9 @@ for ii in range(args.itr):
     time_now = time.time()
 
     train_steps = len(train_loader)
+
+    # each epoch we check if the result is the best and if it isn't after n consecutive steps,
+    # we stop
     early_stopping = EarlyStopping(
         accelerator=accelerator, patience=args.patience)
 
@@ -88,6 +91,8 @@ for ii in range(args.itr):
             trained_parameters.append(p)
 
     model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
+
+    # create scheduler
 
     if args.lradj == "COS":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
