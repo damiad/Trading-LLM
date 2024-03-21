@@ -15,8 +15,6 @@ def get_args():
     parser.add_argument('--seed', type=int, default=2021, help='random seed')
 
     # data loader
-    # parser.add_argument('--data_pretrain', type=str, required=False, default='', help='dataset type') # Only for pretrain dataloader
-    # parser.add_argument('--data_path_pretrain', type=str, default='', help='data file') # Only for pretrain dataloader
     parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')
     parser.add_argument('--root_path', type=str, default='./dataset', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
@@ -75,8 +73,5 @@ def get_args():
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
     parser.add_argument('--llm_layers', type=int, default=6)
     parser.add_argument('--percent', type=int, default=100)
-
-    #predict from saved
-    parser.add_argument('--line_to_predict', type=int, default=10)
 
     return parser.parse_args()

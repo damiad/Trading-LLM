@@ -17,13 +17,11 @@ from tqdm import tqdm
 from models import TimeLLM, TradingLLM
 
 from data_provider.data_factory import data_provider
-from data_provider_pretrain.data_factory import pretrained_data_provider
 
 import time
 import random
 import numpy as np
 import os
-import sys
 import json
 import csv
 
@@ -44,10 +42,7 @@ accelerator = Accelerator(deepspeed_plugin=deepspeed_plugin)
 
 # file = open("logs/example.txt", 'w')
 for ii in range(args.itr):
-    # creating a unique name for the model
-    setting = generate_pathname(args, ii)
 
-    # if args.data_pretrain == "":
     train_data, train_loader = data_provider(args, "train")
     vali_data, vali_loader = data_provider(args, "val")
     test_data, test_loader = data_provider(args, "test")
@@ -56,6 +51,9 @@ for ii in range(args.itr):
         model = TradingLLM.Model(args).float()
     else:
         model = TimeLLM.Model(args).float()
+
+    # creating a unique name for the model
+    setting = generate_pathname(args, ii)
 
     path = os.path.join(
         args.checkpoints, setting + "-" + args.model_comment
