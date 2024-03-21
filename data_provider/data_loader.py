@@ -309,6 +309,7 @@ class Dataset_Custom(Dataset):
             data_stamp = data_stamp.transpose(1, 0)
 
         self.data_x = data[border1:border2]
+        print("data_x shape: ", self.data_x.shape)
         self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
 
@@ -341,3 +342,11 @@ class Dataset_GBPCAD_hour(Dataset_Custom):
         super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent, 
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)
 
+class Dataset_Sine_01(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 features='M', data_path='sine.csv',
+                 target='target', scale=True, timeenc=0, freq='h', percent=100,
+                 seasonal_patterns=None, to_remove=[], date_col='date'):
+        
+        super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent, 
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col)
