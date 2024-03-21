@@ -307,6 +307,8 @@ class Dataset_Custom(Dataset):
         else:
             data = df_data.values
 
+        # we set data as all columns but date
+
         df_stamp = df_raw[['date']][border1:border2]
         df_stamp['date'] = pd.to_datetime(df_stamp.date)
         if self.timeenc == 0:

@@ -45,6 +45,7 @@ for ii in range(args.itr):
     train_data, train_loader = data_provider(args, "train")
     vali_data, vali_loader = data_provider(args, "val")
     test_data, test_loader = data_provider(args, "test")
+    # print(train_data.values)
 
     if args.model == "TradingLLM":
         model = TradingLLM.Model(args).float()

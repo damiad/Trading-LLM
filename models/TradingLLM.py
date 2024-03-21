@@ -32,7 +32,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
-        self.top_k = 5 # TODO: could be parameter, see forward and calculate lags
+        self.top_k = 5  # TODO: could be parameter, see forward and calculate lags
         self.d_llm = 4096
         self.patch_len = configs.patch_len
         self.stride = configs.stride
@@ -83,7 +83,6 @@ class Model(nn.Module):
         self.normalize_layers = Normalize(configs.enc_in, affine=False)
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-        # print(x_enc.size())
         dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
         return dec_out[:, -self.pred_len:, :]
 
@@ -137,7 +136,8 @@ class Model(nn.Module):
         dec_out = self.normalize_layers(dec_out, 'denorm')
         return dec_out
 
-    def calculate_lags(self, x_enc): #TODO: maybe we could improve it somehow, or at least try and compare results
+    # TODO: maybe we could improve it somehow, or at least try and compare results
+    def calculate_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         k_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         res = q_fft * torch.conj(k_fft)
