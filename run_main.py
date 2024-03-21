@@ -122,11 +122,13 @@ for ii in range(args.itr):
 
         model.train()
         epoch_time = time.time()
+
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(
             enumerate(train_loader)
         ):
             iter_count += 1
             model_optim.zero_grad()
+            # print("batch dimensions: ", batch_x.size())
 
             # accelerator.print(batch_x, batch_x_mark)
 
@@ -136,6 +138,7 @@ for ii in range(args.itr):
             batch_y_mark = batch_y_mark.float().to(accelerator.device)
 
             # decoder input
+            # acceleerate is using this somehow
             dec_inp = (
                 torch.zeros_like(batch_y[:, -args.pred_len:, :])
                 .float()
@@ -162,13 +165,6 @@ for ii in range(args.itr):
             train_loss.append(loss.item())
 
             if (i + 1) % 100 == 0:
-                # file.write(
-                #     "\titers: {0}, epoch: {1} | loss: {2:.7f}\n".format(i + 1, epoch + 1, loss.item()))
-                # file.flush()
-                # accelerator.print(
-                #     "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
-                # print(
-                #     "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                 speed = (time.time() - time_now) / iter_count
                 left_time = speed * \
                     ((args.train_epochs - epoch) * train_steps - i)

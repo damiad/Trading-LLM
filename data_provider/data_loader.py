@@ -224,6 +224,7 @@ class Dataset_Custom(Dataset):
             self.label_len = 24 * 4
             self.pred_len = 24 * 4
         else:
+
             self.seq_len = size[0]
             self.label_len = size[1]
             self.pred_len = size[2]

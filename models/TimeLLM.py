@@ -106,7 +106,7 @@ class Model(nn.Module):
         min_values = torch.min(x_enc, dim=1)[0]
         max_values = torch.max(x_enc, dim=1)[0]
         medians = torch.median(x_enc, dim=1).values
-        lags = self.calcute_lags(x_enc)
+        lags = self.calculate_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
 
         prompt = []
@@ -153,7 +153,7 @@ class Model(nn.Module):
 
         return dec_out
 
-    def calcute_lags(self, x_enc):
+    def calculate_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         k_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         res = q_fft * torch.conj(k_fft)
