@@ -116,9 +116,6 @@ for ii in range(args.itr):
         )
     )
 
-    if args.use_amp:
-        scaler = torch.cuda.amp.GradScaler()
-
     for epoch in range(args.train_epochs):
         iter_count = 0
         train_loss = []
@@ -151,35 +148,18 @@ for ii in range(args.itr):
             )
 
             # encoder - decoder
-            if args.use_amp:
-                with torch.cuda.amp.autocast():
-                    if args.output_attention:
-                        outputs = model(batch_x, batch_x_mark,
-                                        dec_inp, batch_y_mark)[0]
-                    else:
-                        outputs = model(batch_x, batch_x_mark,
-                                        dec_inp, batch_y_mark)
-
-                    f_dim = -1 if args.features == "MS" else 0
-                    outputs = outputs[:, -args.pred_len:, f_dim:]
-                    batch_y = batch_y[:, -args.pred_len:, f_dim:].to(
-                        accelerator.device
-                    )
-                    loss = criterion(outputs, batch_y)
-                    train_loss.append(loss.item())
+            if args.output_attention:
+                outputs = model(batch_x, batch_x_mark,
+                                dec_inp, batch_y_mark)[0]
             else:
-                if args.output_attention:
-                    outputs = model(batch_x, batch_x_mark,
-                                    dec_inp, batch_y_mark)[0]
-                else:
-                    outputs = model(batch_x, batch_x_mark,
-                                    dec_inp, batch_y_mark)
+                outputs = model(batch_x, batch_x_mark,
+                                dec_inp, batch_y_mark)
 
-                f_dim = -1 if args.features == "MS" else 0
-                outputs = outputs[:, -args.pred_len:, f_dim:]
-                batch_y = batch_y[:, -args.pred_len:, f_dim:]
-                loss = criterion(outputs, batch_y)
-                train_loss.append(loss.item())
+            f_dim = -1 if args.features == "MS" else 0
+            outputs = outputs[:, -args.pred_len:, f_dim:]
+            batch_y = batch_y[:, -args.pred_len:, f_dim:]
+            loss = criterion(outputs, batch_y)
+            train_loss.append(loss.item())
 
             if (i + 1) % 100 == 0:
                 # file.write(
@@ -200,13 +180,8 @@ for ii in range(args.itr):
                 iter_count = 0
                 time_now = time.time()
 
-            if args.use_amp:
-                scaler.scale(loss).backward()
-                scaler.step(model_optim)
-                scaler.update()
-            else:
-                accelerator.backward(loss)
-                model_optim.step()
+            accelerator.backward(loss)
+            model_optim.step()
 
             if args.lradj == "TST":
                 adjust_learning_rate(
