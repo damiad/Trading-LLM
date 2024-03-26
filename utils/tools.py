@@ -17,7 +17,8 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
             10: 5e-7, 15: 1e-7, 20: 5e-8
         }
     elif args.lradj == 'type3':
-        lr_adjust = {epoch: args.learning_rate if epoch < 3 else args.learning_rate * (0.9 ** ((epoch - 3) // 1))}
+        lr_adjust = {epoch: args.learning_rate if epoch <
+                     3 else args.learning_rate * (0.9 ** ((epoch - 3) // 1))}
     elif args.lradj == 'PEMS':
         lr_adjust = {epoch: args.learning_rate * (0.95 ** (epoch // 1))}
     elif args.lradj == 'TST':
@@ -56,9 +57,11 @@ class EarlyStopping:
         elif score < self.best_score + self.delta:
             self.counter += 1
             if self.accelerator is None:
-                print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+                print(
+                    f'EarlyStopping counter: {self.counter} out of {self.patience}')
             else:
-                self.accelerator.print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+                self.accelerator.print(
+                    f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
@@ -102,6 +105,7 @@ class StandardScaler():
     def inverse_transform(self, data):
         return (data * self.std) + self.mean
 
+
 def adjustment(gt, pred):
     anomaly_state = False
     for i in range(len(gt)):
@@ -133,6 +137,41 @@ def cal_accuracy(y_pred, y_true):
 def del_files(dir_path):
     shutil.rmtree(dir_path)
 
+
+def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
+    model.eval()
+    with torch.no_grad():
+        for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
+            batch_x = batch_x.float().to(accelerator.device)
+            batch_y = batch_y.float()
+
+            batch_x_mark = batch_x_mark.float().to(accelerator.device)
+            batch_y_mark = batch_y_mark.float().to(accelerator.device)
+            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float()
+            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(
+                accelerator.device)
+            if args.output_attention:
+                outputs = model(batch_x, batch_x_mark,
+                                dec_inp, batch_y_mark)[0]
+            else:
+                outputs = model(batch_x, batch_x_mark,
+                                dec_inp, batch_y_mark)
+
+            f_dim = -1 if args.features == 'MS' else 0
+            outputs = outputs[:, -args.pred_len:, f_dim:]
+            batch_y = batch_y[:, -args.pred_len:,
+                              f_dim:].to(accelerator.device)
+
+            pred = outputs.detach()
+            true = batch_y.detach()
+
+            # print(batch_y)
+            # print(vali_data(0))
+            # print("...")
+            # print(true)
+            break
+
+
 def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
@@ -150,21 +189,17 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
             dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(
                 accelerator.device)
             # encoder - decoder
-            if args.use_amp:
-                with torch.cuda.amp.autocast():
-                    if args.output_attention:
-                        outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                    else:
-                        outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+            if args.output_attention:
+                outputs = model(batch_x, batch_x_mark,
+                                dec_inp, batch_y_mark)[0]
             else:
-                if args.output_attention:
-                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                else:
-                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                outputs = model(batch_x, batch_x_mark,
+                                dec_inp, batch_y_mark)
             # self.accelerator.wait_for_everyone()
             f_dim = -1 if args.features == 'MS' else 0
             outputs = outputs[:, -args.pred_len:, f_dim:]
-            batch_y = batch_y[:, -args.pred_len:, f_dim:].to(accelerator.device)
+            batch_y = batch_y[:, -args.pred_len:,
+                              f_dim:].to(accelerator.device)
 
             pred = outputs.detach()
             true = batch_y.detach()
@@ -192,9 +227,11 @@ def test(args, accelerator, model, train_loader, vali_loader, criterion):
     model.eval()
     with torch.no_grad():
         B, _, C = x.shape
-        dec_inp = torch.zeros((B, args.pred_len, C)).float().to(accelerator.device)
+        dec_inp = torch.zeros((B, args.pred_len, C)
+                              ).float().to(accelerator.device)
         dec_inp = torch.cat([x[:, -args.label_len:, :], dec_inp], dim=1)
-        outputs = torch.zeros((B, args.pred_len, C)).float().to(accelerator.device)
+        outputs = torch.zeros((B, args.pred_len, C)
+                              ).float().to(accelerator.device)
         id_list = np.arange(0, B, args.eval_batch_size)
         id_list = np.append(id_list, B)
         for i in range(len(id_list) - 1):
@@ -210,10 +247,31 @@ def test(args, accelerator, model, train_loader, vali_loader, criterion):
         pred = outputs
         true = torch.from_numpy(np.array(y)).to(accelerator.device)
         batch_y_mark = torch.ones(true.shape).to(accelerator.device)
-        loss = criterion(x[:, :, 0], args.frequency_map, pred[:, :, 0], true, batch_y_mark)
+        loss = criterion(x[:, :, 0], args.frequency_map,
+                         pred[:, :, 0], true, batch_y_mark)
 
     model.train()
     return loss
+
+
+def generate_pathname(args, ii):
+    return "{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}".format(
+        args.model_id,
+        args.model,
+        args.data,
+        args.features,
+        args.seq_len,
+        args.label_len,
+        args.pred_len,
+        args.d_model,
+        args.n_heads,
+        args.e_layers,
+        args.d_layers,
+        args.d_ff,
+        args.factor,
+        args.embed,
+        ii,
+    )
 
 
 def load_content(args):

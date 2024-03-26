@@ -1,6 +1,5 @@
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
-from accelerate import DistributedDataParallelKwargs
 from torch import nn, optim
 from torch.optim import lr_scheduler
 
@@ -30,14 +29,12 @@ with open(path +'/args', 'r') as f:
 
 args.model_checkpoint_path = path
 
-ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
-deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
-accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
+deepspeed_plugin = DeepSpeedPlugin(hf_ds_config="./ds_config_zero2.json")
+accelerator = Accelerator(deepspeed_plugin=deepspeed_plugin)
 
 file = open("logs/example.txt", 'w')
 for ii in range(1):
     train_data, train_loader = data_provider(args, 'train')
-    # vali_data, vali_loader = data_provider(args, 'val')
     test_data, test_loader = data_provider(args, 'test')
 
     if args.model == 'TradingLLM':
@@ -69,14 +66,8 @@ for ii in range(1):
     mae_metric = nn.L1Loss()
 
     model.load_state_dict(torch.load(args.model_checkpoint_path + '/checkpoint', map_location=torch.device('cpu')))
-
-    test_loader, model, model_optim, scheduler= accelerator.prepare(test_loader, model, model_optim, scheduler)
-
-    # train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(
-    #     train_loader, vali_loader, test_loader, model, model_optim, scheduler)
-    
+    test_loader, model, model_optim, scheduler= accelerator.prepare(test_loader, model, model_optim, scheduler)    
     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
-
     accelerator.print("Test Loss: {0:.7f} MAE Loss: {1:.7f}".format(test_loss, test_mae_loss))
 
 

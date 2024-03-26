@@ -32,7 +32,6 @@ class Model(nn.Module):
 
     def __init__(self, configs, patch_len=16, stride=8):
         super(Model, self).__init__()
-        self.task_name = configs.task_name
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
@@ -90,19 +89,13 @@ class Model(nn.Module):
         self.patch_nums = int((configs.seq_len - self.patch_len) / self.stride + 2)
         self.head_nf = self.d_ff * self.patch_nums
 
-        if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
-            self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len,
-                                                 head_dropout=configs.dropout)
-        else:
-            raise NotImplementedError
+        self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len, head_dropout=configs.dropout)
 
         self.normalize_layers = Normalize(configs.enc_in, affine=False)
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-        if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
-            dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-            return dec_out[:, -self.pred_len:, :]
-        return None
+        dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+        return dec_out[:, -self.pred_len:, :]
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         x_enc = self.normalize_layers(x_enc, 'norm')
@@ -113,7 +106,7 @@ class Model(nn.Module):
         min_values = torch.min(x_enc, dim=1)[0]
         max_values = torch.max(x_enc, dim=1)[0]
         medians = torch.median(x_enc, dim=1).values
-        lags = self.calcute_lags(x_enc)
+        lags = self.calculate_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
 
         prompt = []
@@ -160,7 +153,7 @@ class Model(nn.Module):
 
         return dec_out
 
-    def calcute_lags(self, x_enc):
+    def calculate_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         k_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         res = q_fft * torch.conj(k_fft)
