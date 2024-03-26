@@ -213,21 +213,16 @@ class Dataset_ETT_minute(Dataset):
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
 
-
+#TODO: remove the percent from everywhere
 class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h', percent=100,
                  seasonal_patterns=None, to_remove=[], date_col='date', do_shift=False):
-        if size == None:
-            self.seq_len = 24 * 4 * 4
-            self.label_len = 24 * 4
-            self.pred_len = 24 * 4
-        else:
-
-            self.seq_len = size[0]
-            self.label_len = size[1]
-            self.pred_len = size[2]
+        assert size != None
+        self.seq_len = size[0]
+        self.label_len = size[1]
+        self.pred_len = size[2]
         # init
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
@@ -238,7 +233,6 @@ class Dataset_Custom(Dataset):
         self.scale = scale
         self.timeenc = timeenc
         self.freq = freq
-        self.percent = percent
         self.do_shift = do_shift
 
         # change here
@@ -268,9 +262,10 @@ class Dataset_Custom(Dataset):
         # column_names.append(self.target)
         # df_raw = df_raw[column_names]
 
-        if self.do_shift:
-            df_raw[self.target] = df_raw[self.target].shift(1)
-        df_raw.dropna(inplace=True)
+        # if self.do_shift:
+        #     df_raw[f"{self.target}_1"] = df_raw[self.target]
+        #     df_raw[self.target] = df_raw[self.target].shift(1)
+        # df_raw.dropna(inplace=True)
         ##
 
         '''
@@ -290,15 +285,9 @@ class Dataset_Custom(Dataset):
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 
-        if self.set_type == 0:
-            border2 = (border2 - self.seq_len) * \
-                self.percent // 100 + self.seq_len
+        df_data = df_raw[df_raw.columns[1:]]
 
-        if self.features == 'M' or self.features == 'MS':
-            cols_data = df_raw.columns[1:]
-            df_data = df_raw[cols_data]
-        elif self.features == 'S':
-            df_data = df_raw[[self.target]]
+        self.scale = False
 
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]

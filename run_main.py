@@ -111,9 +111,9 @@ for ii in range(args.itr):
     criterion = nn.MSELoss()
     mae_metric = nn.L1Loss()
 
-    train_loader, vali_loader, test_loader, model, model_optim, scheduler = (
+    train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler = (
         accelerator.prepare(
-            train_loader, vali_loader, test_loader, model, model_optim, scheduler
+            train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler
         )
     )
 

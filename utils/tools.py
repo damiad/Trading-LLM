@@ -166,7 +166,7 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
             true = batch_y.detach()
 
             # print(batch_y)
-            print(vali_data(0))
+            # print(vali_data(0))
             # print("...")
             # print(true)
             break
