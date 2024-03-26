@@ -231,11 +231,13 @@ class Dataset_Custom(Dataset):
         self.features = features
         self.target = target
         self.scale = scale
+        
         self.timeenc = timeenc
         self.freq = freq
         self.do_shift = do_shift
 
         # change here
+        # self.scale = False
         self.to_remove = to_remove
         self.date_col = date_col
         ##
@@ -246,6 +248,8 @@ class Dataset_Custom(Dataset):
 
         self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
+        # print("data size is : ", self.data_x.size)
+        # print("total len is : ", self.tot_len)
 
     def __read_data__(self):
         self.scaler = StandardScaler()
@@ -287,7 +291,6 @@ class Dataset_Custom(Dataset):
 
         df_data = df_raw[df_raw.columns[1:]]
 
-        self.scale = False
 
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
@@ -312,6 +315,8 @@ class Dataset_Custom(Dataset):
                 df_stamp['date'].values), freq=self.freq)
             data_stamp = data_stamp.transpose(1, 0)
 
+        # print("data len: ", border2-border1)
+        # print(df_data[border1s[0]:border2s[0]].info())
         self.data_x = data[border1:border2]
         self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
@@ -319,7 +324,6 @@ class Dataset_Custom(Dataset):
     def __getitem__(self, index):
         feat_id = index // self.tot_len
         s_begin = index % self.tot_len
-
         s_end = s_begin + self.seq_len
         r_begin = s_end - self.label_len
         r_end = r_begin + self.label_len + self.pred_len
@@ -340,8 +344,8 @@ class Dataset_Custom(Dataset):
 class Dataset_GBPCAD_hour(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  features='M', data_path='gbpcad_one_hour_202311210827.csv',
-                 target='close', scale=True, timeenc=0, freq='h', percent=100,
-                 seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp'], date_col='barTimestamp'):
+                 target='close', scale=True, timeenc=0, freq='h', percent=100,#,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp', 'open', 'spread', 'usdPerPips', 'ask_volume', 'volume', 'ask_open', 'ask_low', 'ask_high', 'ask_close', 'ask_close', 'low', 'high'], date_col='barTimestamp'):
 
         super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)
