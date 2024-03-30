@@ -237,7 +237,7 @@ class Dataset_Custom(Dataset):
         self.do_shift = do_shift
 
         # change here
-        # self.scale = False
+        # self.scale = False 
         self.to_remove = to_remove
         self.date_col = date_col
         ##

@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 def RSE(pred, true):
@@ -29,6 +30,17 @@ def MAPE(pred, true):
 
 def MSPE(pred, true):
     return np.mean(np.square((pred - true) / true))
+
+#can be optimised
+#not ideal cus we only compare to the first value. 
+#we could also check the delats respectively to the previous value in the array
+#maybe should move to np
+def CG0_cuda(last_val, pred, true):
+    last_val = last_val.view(-1, 1, pred.size(-1)).expand(-1, pred.size(1), pred.size(2))
+    pred_deltas = torch.sign(pred - last_val)
+    true_deltas = torch.sign(true - last_val)
+    count = torch.sum(pred_deltas == true_deltas)
+    return count.item()
 
 
 def metric(pred, true):
