@@ -104,7 +104,7 @@ class Model(nn.Module):
             lags_values_str = str(lags[b].tolist())
             prompt_ = (
                 f"<|start_prompt|>Dataset description: The stock price fluctuation over time"
-                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps information; "
+                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps information. Focus on guessing correctly if the price goes up or down; "
                 "Input statistics: "
                 f"min value {min_values_str}, "
                 f"max value {max_values_str}, "

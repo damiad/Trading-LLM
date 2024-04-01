@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import shutil
 
 from tqdm import tqdm
-from utils.metrics import CG0_cuda
+from utils.metrics import CG0, Metrics
 
 plt.switch_backend('agg')
 
@@ -19,7 +19,7 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
         }
     elif args.lradj == 'type3':
         lr_adjust = {epoch: args.learning_rate if epoch <
-                     3 else args.learning_rate * (0.9 ** ((epoch - 3) // 1))}
+                     3 else args.learning_rate * (0.8 ** ((epoch - 2) // 1))}
     elif args.lradj == 'PEMS':
         lr_adjust = {epoch: args.learning_rate * (0.95 ** (epoch // 1))}
     elif args.lradj == 'TST':
@@ -176,7 +176,7 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
 def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
-    cg_loss = []
+    metrics = Metrics(1) # maybe pass j as a parameter
     model.eval()
     with torch.no_grad():
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
@@ -200,28 +200,30 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
             # self.accelerator.wait_for_everyone()
             f_dim = -1 if args.features == 'MS' else 0
 
-            last_vals = batch_x[:, -1, f_dim:]
+            last_val = batch_x[:, -1, f_dim:].to(accelerator.device)
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:,
                               f_dim:].to(accelerator.device)
-            cg_loss.append(CG0_cuda(last_vals, outputs, batch_y))
+            
 
             pred = outputs.detach()
             true = batch_y.detach()
+            last_val = last_val.detach()
 
             loss = criterion(pred, true)
-
             mae_loss = mae_metric(pred, true)
+
+            metrics.append(last_val, outputs, batch_y)
 
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
 
     total_loss = np.average(total_loss)
     total_mae_loss = np.average(total_mae_loss)
-    total_cg_loss = np.average(cg_loss) / args.pred_len / args.batch_size
 
+    metrics.compute()
     model.train()
-    return total_loss, total_mae_loss, total_cg_loss
+    return total_loss, total_mae_loss, metrics
 
 
 def test(args, accelerator, model, train_loader, vali_loader, criterion):

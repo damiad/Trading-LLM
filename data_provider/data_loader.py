@@ -213,7 +213,9 @@ class Dataset_ETT_minute(Dataset):
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
 
-#TODO: remove the percent from everywhere
+# TODO: remove the percent from everywhere
+
+
 class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
@@ -231,13 +233,13 @@ class Dataset_Custom(Dataset):
         self.features = features
         self.target = target
         self.scale = scale
-        
+
         self.timeenc = timeenc
         self.freq = freq
         self.do_shift = do_shift
 
         # change here
-        # self.scale = False 
+        # self.scale = False
         self.to_remove = to_remove
         self.date_col = date_col
         ##
@@ -291,7 +293,6 @@ class Dataset_Custom(Dataset):
 
         df_data = df_raw[df_raw.columns[1:]]
 
-
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
             self.scaler.fit(train_data.values)
@@ -344,7 +345,8 @@ class Dataset_Custom(Dataset):
 class Dataset_GBPCAD_hour(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  features='M', data_path='gbpcad_one_hour_202311210827.csv',
-                 target='close', scale=True, timeenc=0, freq='h', percent=100,#,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 target='close', scale=True, timeenc=0, freq='h', percent=100,
                  seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp', 'open', 'spread', 'usdPerPips', 'ask_volume', 'volume', 'ask_open', 'ask_low', 'ask_high', 'ask_close', 'ask_close', 'low', 'high'], date_col='barTimestamp'):
 
         super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent,
