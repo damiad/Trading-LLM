@@ -15,7 +15,6 @@ data_dict = {
 def data_provider(args, flag):
     Data = data_dict[args.data]
     timeenc = 0 if args.embed != 'timeF' else 1
-    percent = args.percent
 
     if flag == 'test':
         shuffle_flag = False
@@ -52,7 +51,6 @@ def data_provider(args, flag):
             target=args.target,
             timeenc=timeenc,
             freq=freq,
-            percent=percent,
             seasonal_patterns=args.seasonal_patterns
         )
     data_loader = DataLoader(

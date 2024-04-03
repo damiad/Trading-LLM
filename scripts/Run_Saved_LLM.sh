@@ -38,5 +38,4 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--train_epochs $train_epochs \
 	--model_checkpoint_path $model_path \
 	--model_comment $comment \
-	--percent 100 \
 	--lradj 'type3'

@@ -101,6 +101,5 @@ def get_args():
                         default=0.2, help='pct_start')
     # parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
     parser.add_argument('--llm_layers', type=int, default=6)
-    parser.add_argument('--percent', type=int, default=100)
 
     return parser.parse_args()
