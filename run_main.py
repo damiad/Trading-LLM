@@ -67,7 +67,7 @@ for ii in range(args.itr):
         json.dump(args.__dict__, f, indent=2)
 
     res_header = ["Epoch", "Cost", "TrainLoss",
-                  "ValiLoss", "TestLoss", "MAELoss", "TestCG0", "TestCGD", "TestCGI"]
+                  "ValiLoss", "TestLoss", "MAELoss", "TestCG0", "TestCGD", "TestCGI", "ValiCG0", "ValiCGD", "ValiCGI"]
 
     csvres = open(path+'/results.csv', 'w+')
     reswriter = csv.writer(csvres)
@@ -205,12 +205,12 @@ for ii in range(args.itr):
             args, accelerator, model, test_data, test_loader, criterion, mae_metric
         )
         accelerator.print(
-            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f} CG0: {5:.7f} CGD: {6:.7f}  CGI: {7:.7f}".format(
-                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG0: {5:.7f} CGD: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} ".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi
             )
         )
         reswriter.writerow([epoch+1, time.time() - epoch_time,
-                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi])
+                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgd, vali_metrics.cgi])
         csvres.flush()
 
         early_stopping(vali_loss, model, path)

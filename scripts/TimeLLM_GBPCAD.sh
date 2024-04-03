@@ -1,6 +1,6 @@
 model_name=TradingLLM
-train_epochs=40
-learning_rate=0.01
+train_epochs=100
+learning_rate=0.05
 llama_layers=32
 
 master_port=1234
@@ -10,7 +10,7 @@ d_model=32
 d_ff=128
 num_entries=2000
 
-comment='TimeLLM-GBPCAD'
+comment='two_pred_len'
 
 python3 dataset/ETT-small/cut.py $num_entries
 
@@ -21,7 +21,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model $model_name \
 	--data gbpcad \
 	--features M \
-	--seq_len 15 \
+	--seq_len 24 \
 	--label_len 0 \
 	--pred_len 2 \
 	--factor 3 \
@@ -38,4 +38,4 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--train_epochs $train_epochs \
 	--model_comment $comment \
 	--percent 100 \
-	--lradj 'type1'
+	--lradj 'type3'

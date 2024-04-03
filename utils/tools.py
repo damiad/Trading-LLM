@@ -11,6 +11,7 @@ plt.switch_backend('agg')
 
 def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printout=True):
     if args.lradj == 'type1':
+        assert(0)
         lr_adjust = {epoch: args.learning_rate * (0.5 ** ((epoch - 1) // 1))}
     elif args.lradj == 'type2':
         lr_adjust = {
@@ -18,8 +19,9 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
             10: 5e-7, 15: 1e-7, 20: 5e-8
         }
     elif args.lradj == 'type3':
+        
         lr_adjust = {epoch: args.learning_rate if epoch <
-                     3 else args.learning_rate * (0.8 ** ((epoch - 2) // 1))}
+                     3 else args.learning_rate * (0.9 ** ((epoch - 3) // 1))}
     elif args.lradj == 'PEMS':
         lr_adjust = {epoch: args.learning_rate * (0.95 ** (epoch // 1))}
     elif args.lradj == 'TST':
