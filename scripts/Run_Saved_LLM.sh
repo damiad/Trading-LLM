@@ -11,8 +11,8 @@ d_ff=128
 
 comment='TimeLLM-GBPCAD'
 
+# Update this path based on where your model is saved
 model_path='./checkpoints/long_term_forecast_GBPCAD_TimeLLM_gbpcad_ftM_sl512_ll48_pl96_dm32_nh8_el2_dl1_df128_fc3_ebtimeF_Exp_0-TimeLLM-GBPCAD'
-# model_path='./checkpoints/ETTh1_512_96_TimeLLM-ETTh1/checkpoint.pth' # Update this path based on where your model is saved
 
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_saved_model.py \
 	--root_path ./dataset/ETT-small/ \

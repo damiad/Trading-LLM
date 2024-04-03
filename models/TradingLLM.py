@@ -87,6 +87,7 @@ class Model(nn.Module):
         return dec_out[:, -self.pred_len:, :]
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
+        # TODO: reapeate this logic for all the columns, when given multiple columns in __getitem__
         x_enc = self.normalize_layers(x_enc, 'norm')
         B, T, N = x_enc.size()
         x_enc = x_enc.permute(0, 2, 1).contiguous().reshape(B * N, T, 1)

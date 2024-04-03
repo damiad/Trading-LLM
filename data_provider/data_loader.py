@@ -1,5 +1,4 @@
 import os
-import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
@@ -202,6 +201,7 @@ class Dataset_ETT_minute(Dataset):
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
 
+# TODO: make all above custom as well
 
 class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
@@ -234,11 +234,8 @@ class Dataset_Custom(Dataset):
         self.root_path = root_path
         self.data_path = data_path
         self.__read_data__()
-
         self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
-        # print("data size is : ", self.data_x.size)
-        # print("total len is : ", self.tot_len)
 
     def __read_data__(self):
         self.scaler = StandardScaler()
@@ -306,10 +303,11 @@ class Dataset_Custom(Dataset):
         # print("data len: ", border2-border1)
         # print(df_data[border1s[0]:border2s[0]].info())
         self.data_x = data[border1:border2]
-        self.data_y = data[border1:border2]
+        self.data_y = data[border1:border2] #TODO: let data y be our target column only (with data_stamp for __getitem__)
         self.data_stamp = data_stamp
 
     def __getitem__(self, index):
+        #TODO: overcomplicated indexing, why not return all columns in particural index?
         feat_id = index // self.tot_len
         s_begin = index % self.tot_len
         s_end = s_begin + self.seq_len
