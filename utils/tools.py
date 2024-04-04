@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 import shutil
 
 from tqdm import tqdm
+from utils.metrics import CG0, Metrics
 
 plt.switch_backend('agg')
 
 
 def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printout=True):
     if args.lradj == 'type1':
+        assert(0)
         lr_adjust = {epoch: args.learning_rate * (0.5 ** ((epoch - 1) // 1))}
     elif args.lradj == 'type2':
         lr_adjust = {
@@ -17,6 +19,7 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
             10: 5e-7, 15: 1e-7, 20: 5e-8
         }
     elif args.lradj == 'type3':
+        
         lr_adjust = {epoch: args.learning_rate if epoch <
                      3 else args.learning_rate * (0.9 ** ((epoch - 3) // 1))}
     elif args.lradj == 'PEMS':
@@ -175,6 +178,7 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
 def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
+    metrics = Metrics(1) # maybe pass j as a parameter
     model.eval()
     with torch.no_grad():
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
@@ -197,16 +201,21 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
                                 dec_inp, batch_y_mark)
             # self.accelerator.wait_for_everyone()
             f_dim = -1 if args.features == 'MS' else 0
+
+            last_val = batch_x[:, -1, f_dim:].to(accelerator.device)
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:,
                               f_dim:].to(accelerator.device)
+            
 
             pred = outputs.detach()
             true = batch_y.detach()
+            last_val = last_val.detach()
 
             loss = criterion(pred, true)
-
             mae_loss = mae_metric(pred, true)
+
+            metrics.append(last_val, outputs, batch_y)
 
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
@@ -214,8 +223,9 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
     total_loss = np.average(total_loss)
     total_mae_loss = np.average(total_mae_loss)
 
+    metrics.compute()
     model.train()
-    return total_loss, total_mae_loss
+    return total_loss, total_mae_loss, metrics
 
 
 def test(args, accelerator, model, train_loader, vali_loader, criterion):

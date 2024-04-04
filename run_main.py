@@ -7,6 +7,7 @@ from utils.tools import (
     load_content,
     generate_pathname,
 )
+from utils.metrics import CG0, CGD, CGI
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
 from torch import nn, optim
@@ -66,7 +67,7 @@ for ii in range(args.itr):
         json.dump(args.__dict__, f, indent=2)
 
     res_header = ["Epoch", "Cost", "TrainLoss",
-                  "ValiLoss", "TestLoss", "MAELoss"]
+                  "ValiLoss", "TestLoss", "MAELoss", "TestCG0", "TestCGD", "TestCGI", "ValiCG0", "ValiCGD", "ValiCGI"]
 
     csvres = open(path+'/results.csv', 'w+')
     reswriter = csv.writer(csvres)
@@ -158,12 +159,18 @@ for ii in range(args.itr):
             else:
                 outputs = model(batch_x, batch_x_mark,
                                 dec_inp, batch_y_mark)
+            
+            
 
             f_dim = -1 if args.features == "MS" else 0
+            last_vals = batch_x[:, -1, f_dim:]
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:, f_dim:]
             loss = criterion(outputs, batch_y)
             train_loss.append(loss.item())
+
+            # print("CGI: ", CGI(1, last_vals, outputs, batch_y))
+
 
             if (i + 1) % 100 == 0:
                 speed = (time.time() - time_now) / iter_count
@@ -191,19 +198,19 @@ for ii in range(args.itr):
                 epoch + 1, time.time() - epoch_time)
         )
         train_loss = np.average(train_loss)
-        vali_loss, vali_mae_loss = vali(
+        vali_loss, vali_mae_loss, vali_metrics = vali(
             args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
         )
-        test_loss, test_mae_loss = vali(
+        test_loss, test_mae_loss, test_metrics = vali(
             args, accelerator, model, test_data, test_loader, criterion, mae_metric
         )
         accelerator.print(
-            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
-                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG0: {5:.7f} CGD: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} ".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi
             )
         )
         reswriter.writerow([epoch+1, time.time() - epoch_time,
-                           train_loss, vali_loss, test_loss, test_mae_loss])
+                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgd, vali_metrics.cgi])
         csvres.flush()
 
         early_stopping(vali_loss, model, path)

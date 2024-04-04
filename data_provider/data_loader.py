@@ -1,5 +1,4 @@
 import os
-import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
@@ -12,7 +11,7 @@ warnings.filterwarnings('ignore')
 class Dataset_ETT_hour(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
-                 target='OT', scale=True, timeenc=0, freq='h', percent=100,
+                 target='OT', scale=True, timeenc=0, freq='h',
                  seasonal_patterns=None):
         if size == None:
             self.seq_len = 24 * 4 * 4
@@ -27,14 +26,12 @@ class Dataset_ETT_hour(Dataset):
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
 
-        self.percent = percent
         self.features = features
         self.target = target
         self.scale = scale
         self.timeenc = timeenc
         self.freq = freq
 
-        # self.percent = percent
         self.root_path = root_path
         self.data_path = data_path
         self.__read_data__()
@@ -54,10 +51,6 @@ class Dataset_ETT_hour(Dataset):
 
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
-
-        if self.set_type == 0:
-            border2 = (border2 - self.seq_len) * \
-                self.percent // 100 + self.seq_len
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -114,7 +107,7 @@ class Dataset_ETT_hour(Dataset):
 class Dataset_ETT_minute(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTm1.csv',
-                 target='OT', scale=True, timeenc=0, freq='t', percent=100,
+                 target='OT', scale=True, timeenc=0, freq='t',
                  seasonal_patterns=None):
         if size == None:
             self.seq_len = 24 * 4 * 4
@@ -129,7 +122,6 @@ class Dataset_ETT_minute(Dataset):
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
 
-        self.percent = percent
         self.features = features
         self.target = target
         self.scale = scale
@@ -155,10 +147,6 @@ class Dataset_ETT_minute(Dataset):
 
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
-
-        if self.set_type == 0:
-            border2 = (border2 - self.seq_len) * \
-                self.percent // 100 + self.seq_len
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -213,11 +201,12 @@ class Dataset_ETT_minute(Dataset):
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
 
-#TODO: remove the percent from everywhere
+# TODO: make all above custom as well
+
 class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
-                 target='OT', scale=True, timeenc=0, freq='h', percent=100,
+                 target='OT', scale=True, timeenc=0, freq='h',
                  seasonal_patterns=None, to_remove=[], date_col='date', do_shift=False):
         assert size != None
         self.seq_len = size[0]
@@ -231,7 +220,7 @@ class Dataset_Custom(Dataset):
         self.features = features
         self.target = target
         self.scale = scale
-        
+
         self.timeenc = timeenc
         self.freq = freq
         self.do_shift = do_shift
@@ -245,11 +234,8 @@ class Dataset_Custom(Dataset):
         self.root_path = root_path
         self.data_path = data_path
         self.__read_data__()
-
         self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
-        # print("data size is : ", self.data_x.size)
-        # print("total len is : ", self.tot_len)
 
     def __read_data__(self):
         self.scaler = StandardScaler()
@@ -291,7 +277,6 @@ class Dataset_Custom(Dataset):
 
         df_data = df_raw[df_raw.columns[1:]]
 
-
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
             self.scaler.fit(train_data.values)
@@ -318,10 +303,11 @@ class Dataset_Custom(Dataset):
         # print("data len: ", border2-border1)
         # print(df_data[border1s[0]:border2s[0]].info())
         self.data_x = data[border1:border2]
-        self.data_y = data[border1:border2]
+        self.data_y = data[border1:border2] #TODO: let data y be our target column only (with data_stamp for __getitem__)
         self.data_stamp = data_stamp
 
     def __getitem__(self, index):
+        #TODO: overcomplicated indexing, why not return all columns in particural index?
         feat_id = index // self.tot_len
         s_begin = index % self.tot_len
         s_end = s_begin + self.seq_len
@@ -344,18 +330,19 @@ class Dataset_Custom(Dataset):
 class Dataset_GBPCAD_hour(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  features='M', data_path='gbpcad_one_hour_202311210827.csv',
-                 target='close', scale=True, timeenc=0, freq='h', percent=100,#,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 target='close', scale=True, timeenc=0, freq='h',
                  seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp', 'open', 'spread', 'usdPerPips', 'ask_volume', 'volume', 'ask_open', 'ask_low', 'ask_high', 'ask_close', 'ask_close', 'low', 'high'], date_col='barTimestamp'):
 
-        super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent,
+        super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)
 
 
 class Dataset_Sine_01(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  features='M', data_path='sine.csv',
-                 target='target', scale=True, timeenc=0, freq='h', percent=100,
+                 target='target', scale=True, timeenc=0, freq='h',
                  seasonal_patterns=None, to_remove=[], date_col='date'):
 
-        super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq, percent=percent,
+        super().__init__(root_path, flag=flag, size=size, features=features, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col)
