@@ -102,4 +102,7 @@ def get_args():
     # parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
     parser.add_argument('--llm_layers', type=int, default=6)
 
+    #custom 
+    parser.add_argument('--cg_value', type=int, default=1)
+
     return parser.parse_args()

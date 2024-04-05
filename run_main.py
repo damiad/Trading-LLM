@@ -7,7 +7,7 @@ from utils.tools import (
     load_content,
     generate_pathname,
 )
-from utils.metrics import CG0, CGD, CGI
+from utils.metrics import CG0, CGD, CGI, CG, CG_AVG
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
 from torch import nn, optim
@@ -67,7 +67,7 @@ for ii in range(args.itr):
         json.dump(args.__dict__, f, indent=2)
 
     res_header = ["Epoch", "Cost", "TrainLoss",
-                  "ValiLoss", "TestLoss", "MAELoss", "TestCG0", "TestCGD", "TestCGI", "ValiCG0", "ValiCGD", "ValiCGI"]
+                  "ValiLoss", "TestLoss", "MAELoss", "TestCG", "TestCGD", "TestCGI", "ValiCG", "ValiCGD", "ValiCGI", "TrainCG"]
 
     csvres = open(path+'/results.csv', 'w+')
     reswriter = csv.writer(csvres)
@@ -93,6 +93,7 @@ for ii in range(args.itr):
             trained_parameters.append(p)
 
     model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
+    model_optim.param_groups[0]['lr'] = args.learning_rate
 
     # create scheduler
 
@@ -124,10 +125,12 @@ for ii in range(args.itr):
 
         model.train()
         epoch_time = time.time()
+        train_cg_loss = []
 
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(
             enumerate(train_loader)
         ):
+            
             iter_count += 1
             model_optim.zero_grad()
             # print("batch dimensions: ", batch_x.size())
@@ -169,16 +172,20 @@ for ii in range(args.itr):
             loss = criterion(outputs, batch_y)
             train_loss.append(loss.item())
 
-            # print("CGI: ", CGI(1, last_vals, outputs, batch_y))
+            last_vals.detach()
+            outputs.detach()
+            batch_y.detach()
+            train_cg_loss.append(CG(args.cg_value, last_vals, outputs, batch_y))
+            
 
-
+            
             if (i + 1) % 100 == 0:
                 speed = (time.time() - time_now) / iter_count
                 left_time = speed * \
                     ((args.train_epochs - epoch) * train_steps - i)
                 accelerator.print(
-                    "\tspeed: {:.4f}s/iter; left time: {:.4f}s".format(
-                        speed, left_time)
+                    "\tspeed: {:.4f}s/iter; left time: {:.4f}s, CG: {:.4f}".format(
+                        speed, left_time, np.mean(train_cg_loss))
                 )
                 # print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                 iter_count = 0
@@ -205,12 +212,12 @@ for ii in range(args.itr):
             args, accelerator, model, test_data, test_loader, criterion, mae_metric
         )
         accelerator.print(
-            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG0: {5:.7f} CGD: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} ".format(
-                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG_train: {5:.7f} CG: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} ".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, np.mean(train_cg_loss), test_metrics.cg0, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi
             )
         )
         reswriter.writerow([epoch+1, time.time() - epoch_time,
-                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgd, vali_metrics.cgi])
+                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgd, vali_metrics.cgi, np.mean(train_cg_loss)])
         csvres.flush()
 
         early_stopping(vali_loss, model, path)

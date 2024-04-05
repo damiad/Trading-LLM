@@ -2,8 +2,9 @@ import numpy as np
 import torch
 
 class Metrics:
-    def __init__(self, j):
+    def __init__(self, j, cg_value ):
         self.j = j
+        self.cg_value = cg_value
         self.rse = []
         self.corr = []
         self.mae = []
@@ -23,7 +24,7 @@ class Metrics:
         # self.rmse.append(RMSE(pred, true))
         # self.mape.append(MAPE(pred, true))
         # self.mspe.append(MSPE(pred, true))
-        self.cg0.append(CG0(last_val, pred, true))
+        self.cg0.append(CG(self.cg_value, last_val, pred, true))
         self.cgd.append(CGD(last_val, pred, true))
         self.cgi.append(CGI(self.j, last_val, pred, true))
     def compute(self):
@@ -69,6 +70,33 @@ def MAPE(pred, true):
 def MSPE(pred, true):
     return np.mean(np.square((pred - true) / true))
 
+
+def CG(k, last_val, pred, true):
+    k -= 1
+    assert( k < pred.size(1))
+    pred = pred[:, k, :]
+    true = true[:, k, :]
+    pred_deltas = torch.sign(pred - last_val)
+    true_deltas = torch.sign(true - last_val)
+    count = torch.sum(pred_deltas == true_deltas)
+    return count.item() /  pred_deltas.numel()
+
+def CG_AVG(k, d, last_val, pred, true):
+    k -= 1
+    assert(k + d < pred.size(1) and k - d >= 0)
+    pred = pred[:, k-d:k+d+1, :]
+    true = true[:, k-d:k+d+1, :]
+    pred = pred.permute(0, 2, 1)
+    true = true.permute(0, 2, 1)
+    pred = torch.mean(pred, 2)
+    true = torch.mean(true, 2)
+    pred_deltas = torch.sign(pred - last_val)
+    true_deltas = torch.sign(true - last_val)
+    count = torch.sum(pred_deltas == true_deltas)
+    return count.item() / pred_deltas.numel()
+
+
+
 #can be optimised
 #not ideal cus we only compare to the first value. 
 #maybe should move to np
@@ -82,7 +110,7 @@ def CG0(last_val, pred, true):
     true_deltas = true_deltas[:,0,:]
     count = torch.sum(pred_deltas == true_deltas)
     # return count.item()
-    return count.item() / pred_deltas.size(0) / pred_deltas.size(1)
+    return count.item() / pred_deltas.numel()
 
 #now we define accuracy as the % of correctly guessed directions
 #D cuz directions
@@ -97,7 +125,7 @@ def CGD(last_val, pred, true):
     true_deltas = torch.sign(true - true_last)
     count = torch.sum(pred_deltas == true_deltas)
     # return count.item()
-    return count.item() / pred_deltas.size(0) / pred_deltas.size(1)
+    return count.item() / pred_deltas.numel()
 
 #next we define accuracy as  
 # 1 if min_{k \in i-1,i,i+1,...,i+j}true[k]<= pred[i] <= max_{k \in i-1,i,i+1,...,i+j}true[k] else 0
@@ -123,7 +151,7 @@ def CGI(j, last_val, pred, true):
     # exit()
     count = torch.sum((pred >= minvals) & (pred <= maxvals))
     # return count.item()
-    return count.item() / pred.size(0) / pred.size(2)
+    return count.item() / pred.numel()
     # print("pred_last: " ,pred_last )
     # print("maxpool: ", maxpool(pred_last))
 

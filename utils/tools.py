@@ -11,7 +11,6 @@ plt.switch_backend('agg')
 
 def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printout=True):
     if args.lradj == 'type1':
-        assert(0)
         lr_adjust = {epoch: args.learning_rate * (0.5 ** ((epoch - 1) // 1))}
     elif args.lradj == 'type2':
         lr_adjust = {
@@ -178,7 +177,7 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
 def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
-    metrics = Metrics(1) # maybe pass j as a parameter
+    metrics = Metrics(1, args.cg_value) # maybe pass j as a parameter
     model.eval()
     with torch.no_grad():
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
