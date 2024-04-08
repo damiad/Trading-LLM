@@ -106,7 +106,7 @@ class TimeFeatureEmbedding(nn.Module):
         return self.embed(x)
 
 
-class DataEmbedding(nn.Module):
+class DataEmbedding(nn.Module): #TODO: try using this one (c_in could be 7)
     def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
         super(DataEmbedding, self).__init__()
 

@@ -263,7 +263,7 @@ def test(args, accelerator, model, train_loader, vali_loader, criterion):
 
 
 def generate_pathname(args, ii):
-    return "{}_{}_{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}".format(
+    return "{}_{}_{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_eb{}_{}".format(
         args.model_id,
         args.model,
         args.data,
@@ -275,7 +275,6 @@ def generate_pathname(args, ii):
         args.e_layers,
         args.d_layers,
         args.d_ff,
-        args.factor,
         args.embed,
         ii,
     )

@@ -55,7 +55,6 @@ def get_args():
                         help='dimension of fcn')
     parser.add_argument('--moving_avg', type=int, default=25,
                         help='window size of moving average')
-    parser.add_argument('--factor', type=int, default=1, help='attn factor')
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
     parser.add_argument('--embed', type=str, default='timeF',
                         help='time features encoding, options:[timeF, fixed, learned]')
