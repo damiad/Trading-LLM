@@ -48,11 +48,6 @@ def get_args():
     # model define
     parser.add_argument('--model_checkpoint_path', type=str,
                         required=False)  # pass when loading checkpoint
-    parser.add_argument('--enc_in', type=int, default=7,
-                        help='encoder input size')
-    parser.add_argument('--dec_in', type=int, default=7,
-                        help='decoder input size')
-    parser.add_argument('--c_out', type=int, default=7, help='output size')
     parser.add_argument('--d_model', type=int, default=16,
                         help='dimension of model')
     parser.add_argument('--n_heads', type=int, default=8, help='num of heads')

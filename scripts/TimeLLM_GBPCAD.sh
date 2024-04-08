@@ -26,9 +26,6 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--pred_len 40 \
 	--factor 3 \
 	--target 'close' \
-	--enc_in 10 \
-	--dec_in 10 \
-	--c_out 10 \
 	--itr 1 \
 	--d_model $d_model \
 	--d_ff $d_ff \

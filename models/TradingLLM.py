@@ -11,9 +11,8 @@ base_model_path = "/home/heorhii/zpp/Trading-LLM/llama-7b"
 
 
 class FlattenHead(nn.Module):
-    def __init__(self, n_vars, nf, target_window, head_dropout=0):
+    def __init__(self, nf, target_window, head_dropout=0):
         super().__init__()
-        self.n_vars = n_vars
         self.flatten = nn.Flatten(start_dim=-2)
         self.linear = nn.Linear(nf, target_window)
         self.dropout = nn.Dropout(head_dropout)
@@ -23,7 +22,6 @@ class FlattenHead(nn.Module):
         x = self.linear(x)
         x = self.dropout(x)
         return x
-
 
 class Model(nn.Module):
 
@@ -79,8 +77,8 @@ class Model(nn.Module):
             (configs.seq_len - self.patch_len) / self.stride + 2)
         self.head_nf = self.d_ff * self.patch_nums
         self.output_projection = FlattenHead(
-            configs.enc_in, self.head_nf, self.pred_len, head_dropout=configs.dropout)
-        self.normalize_layers = Normalize(configs.enc_in, affine=False)
+            self.head_nf, self.pred_len, head_dropout=configs.dropout)
+        self.normalize_layers = Normalize()
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)

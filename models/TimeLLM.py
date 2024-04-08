@@ -89,9 +89,9 @@ class Model(nn.Module):
         self.patch_nums = int((configs.seq_len - self.patch_len) / self.stride + 2)
         self.head_nf = self.d_ff * self.patch_nums
 
-        self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len, head_dropout=configs.dropout)
+        self.output_projection = FlattenHead(self.head_nf, self.pred_len, head_dropout=configs.dropout)
 
-        self.normalize_layers = Normalize(configs.enc_in, affine=False)
+        self.normalize_layers = Normalize()
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
