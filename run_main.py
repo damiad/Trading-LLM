@@ -93,7 +93,7 @@ for ii in range(args.itr):
             trained_parameters.append(p)
 
     model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
-    model_optim.param_groups[0]['lr'] = args.learning_rate
+    
 
     # create scheduler
 
@@ -111,6 +111,7 @@ for ii in range(args.itr):
         )
 
     criterion = nn.MSELoss()
+    # criterion = nn.L1Loss()
     mae_metric = nn.L1Loss()
 
     train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler = (

@@ -94,7 +94,7 @@ class Model(nn.Module):
         min_values = torch.min(x_enc, dim=1)[0]
         max_values = torch.max(x_enc, dim=1)[0]
         medians = torch.median(x_enc, dim=1).values
-        lags = self.calculate_lags(x_enc)
+        lags, last_lags = self.calculate_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
 
         prompt = []
@@ -103,16 +103,20 @@ class Model(nn.Module):
             max_values_str = str(max_values[b].tolist()[0])
             median_values_str = str(medians[b].tolist()[0])
             lags_values_str = str(lags[b].tolist())
+            last_lags_values_str = str(last_lags[b].tolist()[-self.top_k:])
+
             prompt_ = (
-                f"<|start_prompt|>Dataset description: The stock price fluctuation over time"
-                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps information. Focus on guessing correctly if the price goes up or down; "
+                f"<|start_prompt|>Dataset description: The stock price fluctuation over time. "
+                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps information. "
                 "Input statistics: "
                 f"min value {min_values_str}, "
                 f"max value {max_values_str}, "
                 f"median value {median_values_str}, "
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
                 f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
+                # f"last {self.top_k} lags are: {last_lags_values_str}<|<end_prompt>|>"
             )
+            # print(prompt_)
             prompt.append(prompt_)
 
         x_enc = x_enc.reshape(B, N, T).permute(0, 2, 1).contiguous()
@@ -145,7 +149,8 @@ class Model(nn.Module):
         corr = torch.fft.irfft(res, dim=-1)
         mean_value = torch.mean(corr, dim=1)
         _, lags = torch.topk(mean_value, self.top_k, dim=-1)
-        return lags
+        last_vals = x_enc[:, :, -self.top_k:]
+        return lags, last_vals
 
 
 class ReprogrammingLayer(nn.Module):

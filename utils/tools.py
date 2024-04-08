@@ -11,16 +11,16 @@ plt.switch_backend('agg')
 
 def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printout=True):
     if args.lradj == 'type1':
-        lr_adjust = {epoch: args.learning_rate * (0.5 ** ((epoch - 1) // 1))}
+        lr_adjust = {epoch: args.learning_rate * (0.8 ** ((epoch - 1) // 1))}
     elif args.lradj == 'type2':
         lr_adjust = {
             2: 5e-5, 4: 1e-5, 6: 5e-6, 8: 1e-6,
             10: 5e-7, 15: 1e-7, 20: 5e-8
         }
     elif args.lradj == 'type3':
-        
+
         lr_adjust = {epoch: args.learning_rate if epoch <
-                     3 else args.learning_rate * (0.9 ** ((epoch - 3) // 1))}
+                     3 else args.learning_rate * (0.8 ** ((epoch - 3) // 1))}
     elif args.lradj == 'PEMS':
         lr_adjust = {epoch: args.learning_rate * (0.95 ** (epoch // 1))}
     elif args.lradj == 'TST':
@@ -177,7 +177,7 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
 def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
-    metrics = Metrics(1, args.cg_value) # maybe pass j as a parameter
+    metrics = Metrics(10, args.cg_value)  # maybe pass j as a parameter
     model.eval()
     with torch.no_grad():
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
@@ -205,7 +205,6 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:,
                               f_dim:].to(accelerator.device)
-            
 
             pred = outputs.detach()
             true = batch_y.detach()

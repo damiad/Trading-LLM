@@ -1,16 +1,16 @@
 model_name=TradingLLM
 train_epochs=100
-learning_rate=0.5
+learning_rate=0.02
 llama_layers=32
 
 master_port=1234
 num_process=1
-batch_size=8 #24
+batch_size=10 #24
 d_model=32
 d_ff=128
-num_entries=500
+num_entries=20000
 
-comment='two_pred_len'
+comment='20k-type1-beginning-bigpred'
 
 python3 dataset/ETT-small/cut.py $num_entries
 
@@ -21,14 +21,14 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model $model_name \
 	--data gbpcad \
 	--features M \
-	--seq_len 24 \
-	--label_len 0 \
-	--pred_len 1 \
+	--seq_len 80 \
+	--label_len 10 \
+	--pred_len 40 \
 	--factor 3 \
 	--target 'close' \
-	--enc_in 7 \
-	--dec_in 7 \
-	--c_out 7 \
+	--enc_in 10 \
+	--dec_in 10 \
+	--c_out 10 \
 	--itr 1 \
 	--d_model $d_model \
 	--d_ff $d_ff \
@@ -38,7 +38,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--train_epochs $train_epochs \
 	--model_comment $comment \
 	--lradj 'type3' \
-	--cg_value 1 \
+	--cg_value 10 \
 	--patience 20
 
-	# patience add
+# patience add

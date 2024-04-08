@@ -1,7 +1,6 @@
 llama-7b/
 dataset/
 venv/
-logs/
 checkpoints/
 scripts/Predict_Saved_LLM.sh
 scripts/TimeLLM_SINE.sh
