@@ -159,7 +159,7 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
                 outputs = model(batch_x, batch_x_mark,
                                 dec_inp, batch_y_mark)
 
-            f_dim = -1 if args.features == 'MS' else 0
+            f_dim = 0
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:,
                               f_dim:].to(accelerator.device)
@@ -199,7 +199,7 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
                 outputs = model(batch_x, batch_x_mark,
                                 dec_inp, batch_y_mark)
             # self.accelerator.wait_for_everyone()
-            f_dim = -1 if args.features == 'MS' else 0
+            f_dim = 0
 
             last_val = batch_x[:, -1, f_dim:].to(accelerator.device)
             outputs = outputs[:, -args.pred_len:, f_dim:]
@@ -250,7 +250,7 @@ def test(args, accelerator, model, train_loader, vali_loader, criterion):
                 None
             )
         accelerator.wait_for_everyone()
-        f_dim = -1 if args.features == 'MS' else 0
+        f_dim = 0
         outputs = outputs[:, -args.pred_len:, f_dim:]
         pred = outputs
         true = torch.from_numpy(np.array(y)).to(accelerator.device)
@@ -263,11 +263,10 @@ def test(args, accelerator, model, train_loader, vali_loader, criterion):
 
 
 def generate_pathname(args, ii):
-    return "{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}".format(
+    return "{}_{}_{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}".format(
         args.model_id,
         args.model,
         args.data,
-        args.features,
         args.seq_len,
         args.label_len,
         args.pred_len,

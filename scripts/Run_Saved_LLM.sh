@@ -20,7 +20,6 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_id GBPCAD \
 	--model $model_name \
 	--data gbpcad \
-	--features M \
 	--seq_len 512 \
 	--label_len 48 \
 	--pred_len 96 \

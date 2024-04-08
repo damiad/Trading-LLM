@@ -20,10 +20,6 @@ def get_args():
                         default='./dataset', help='root path of the data file')
     parser.add_argument('--data_path', type=str,
                         default='ETTh1.csv', help='data file')
-    parser.add_argument('--features', type=str, default='M',
-                        help='forecasting task, options:[M, S, MS]; '
-                        'M:multivariate predict multivariate, S: univariate predict univariate, '
-                        'MS:multivariate predict univariate')
     parser.add_argument('--target', type=str, default='OT',
                         help='target feature in S or MS task')
     parser.add_argument('--loader', type=str,

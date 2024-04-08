@@ -166,7 +166,7 @@ for ii in range(args.itr):
             
             
 
-            f_dim = -1 if args.features == "MS" else 0
+            f_dim = 0
             last_vals = batch_x[:, -1, f_dim:]
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:, f_dim:]
