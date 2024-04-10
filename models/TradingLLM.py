@@ -30,7 +30,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
-        self.top_k = 5  # TODO: could be parameter, see forward and calculate lags
+        self.top_k = 10  # TODO: could be parameter, see forward and calculate lags
         self.d_llm = 4096
         self.patch_len = configs.patch_len
         self.stride = configs.stride
@@ -66,7 +66,7 @@ class Model(nn.Module):
         self.dropout = nn.Dropout(configs.dropout)
 
         self.patch_embedding = PatchEmbedding(
-            configs.d_model, self.patch_len, self.stride, configs.dropout)
+          configs.d_model, self.patch_len, self.stride, configs.dropout)
         
         # TODO: uncomment and test
         # self.data_embedding = DataEmbedding(c_in=7, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
@@ -97,7 +97,7 @@ class Model(nn.Module):
         min_values = torch.min(x_enc, dim=1)[0]
         max_values = torch.max(x_enc, dim=1)[0]
         medians = torch.median(x_enc, dim=1).values
-        lags, last_lags = self.calculate_lags(x_enc)
+        lags = self.calculate_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
 
         prompt = []
@@ -106,7 +106,8 @@ class Model(nn.Module):
             max_values_str = str(max_values[b].tolist()[0])
             median_values_str = str(medians[b].tolist()[0])
             lags_values_str = str(lags[b].tolist())
-            last_lags_values_str = str(last_lags[b].tolist()[-self.top_k:])
+            # TODO: uncomment it and test if actualy works (lines: 110, 121,122)
+            # last_5_values_str = [str(value.tolist()) for value in x_enc[b, -5:, 0]]
 
             prompt_ = (
                 f"<|start_prompt|>Dataset description: The stock price fluctuation over time. "
@@ -117,7 +118,8 @@ class Model(nn.Module):
                 f"median value {median_values_str}, "
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
                 f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
-                # f"last {self.top_k} lags are: {last_lags_values_str}<|<end_prompt>|>"
+                # f"top {self.top_k} lags are : {lags_values_str}, "
+                # f"last 5 values are : {', '.join(last_5_values_str)}<|<end_prompt>|>"
             )
             # print(prompt_)
             prompt.append(prompt_)
@@ -156,8 +158,7 @@ class Model(nn.Module):
         corr = torch.fft.irfft(res, dim=-1)
         mean_value = torch.mean(corr, dim=1)
         _, lags = torch.topk(mean_value, self.top_k, dim=-1)
-        last_vals = x_enc[:, :, -self.top_k:]
-        return lags, last_vals
+        return lags
 
 
 class ReprogrammingLayer(nn.Module):

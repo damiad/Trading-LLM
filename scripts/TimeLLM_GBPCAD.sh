@@ -21,8 +21,8 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model $model_name \
 	--data gbpcad \
 	--seq_len 80 \
-	--label_len 10 \
-	--pred_len 40 \
+	--label_len 0 \
+	--pred_len 13 \
 	--target 'close' \
 	--itr 1 \
 	--d_model $d_model \
@@ -33,7 +33,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--train_epochs $train_epochs \
 	--model_comment $comment \
 	--lradj 'type3' \
-	--cg_value 10 \
+	--cg_value 3 \
 	--patience 20
 
 # patience add

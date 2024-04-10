@@ -206,6 +206,14 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
             batch_y = batch_y[:, -args.pred_len:,
                               f_dim:].to(accelerator.device)
 
+            #TODO: Same as in run_main.py (change in the rest of places too)
+            # Cropping because beggining may be unpredictible and we don't care about later records
+            # Obviously this could be param (if it will work), 
+            # we can also tell to model what to predict actually (prompt and dataloader)
+            outputs = outputs[:, 7:12, :] 
+            batch_y = batch_y[:, 7:12, :]
+            ###################################################################
+
             pred = outputs.detach()
             true = batch_y.detach()
             last_val = last_val.detach()
