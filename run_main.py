@@ -174,8 +174,8 @@ for ii in range(args.itr):
             #TODO: Cropping because beggining may be unpredictible and we don't care about later records
             # Obviously this could be param (if it will work), 
             # we can also tell to model what to predict actually (prompt and dataloader)
-            outputs = outputs[:, 7:12, :] 
-            batch_y = batch_y[:, 7:12, :]
+            # outputs = outputs[:, 7:12, :] 
+            # batch_y = batch_y[:, 7:12, :]
             ###################################################################
 
             loss = criterion(outputs, batch_y)

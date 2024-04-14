@@ -5,7 +5,7 @@ llama_layers=32
 
 master_port=1234
 num_process=1
-batch_size=10 #24
+batch_size=5 #24
 d_model=32
 d_ff=128
 num_entries=20000
@@ -20,9 +20,9 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_id GBPCAD \
 	--model $model_name \
 	--data gbpcad \
-	--seq_len 80 \
+	--seq_len 40 \
 	--label_len 0 \
-	--pred_len 13 \
+	--pred_len 6 \
 	--target 'close' \
 	--itr 1 \
 	--d_model $d_model \

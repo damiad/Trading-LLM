@@ -6,6 +6,8 @@ from transformers import LlamaConfig, LlamaModel, LlamaTokenizer
 from layers.Embed import PatchEmbedding, DataEmbedding
 import transformers
 from layers.StandardNorm import Normalize
+import pandas_ta as ta
+import pandas as pd
 transformers.logging.set_verbosity_error()
 base_model_path = "/home/heorhii/zpp/Trading-LLM/llama-7b"
 
@@ -30,7 +32,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
-        self.top_k = 10  # TODO: could be parameter, see forward and calculate lags
+        self.top_k = 4  # TODO: could be parameter, see forward and calculate lags
         self.d_llm = 4096
         self.patch_len = configs.patch_len
         self.stride = configs.stride
@@ -106,8 +108,28 @@ class Model(nn.Module):
             max_values_str = str(max_values[b].tolist()[0])
             median_values_str = str(medians[b].tolist()[0])
             lags_values_str = str(lags[b].tolist())
-            # TODO: uncomment it and test if actualy works (lines: 110, 121,122)
-            # last_5_values_str = [str(value.tolist()) for value in x_enc[b, -5:, 0]]
+            # TODO: uncomment when talib is installed
+            all_values = [value.tolist() for value in x_enc[b, :, 0]]
+            df = pd.DataFrame(all_values, columns=['close'])
+            length = max(8, int(0.4 * len(all_values)))
+            df['RSI'] = ta.rsi(df['close'], length=length)
+            rsi_value = df['RSI'].iloc[-1]
+            fast = max(2, int(0.20 * len(all_values)))  
+            slow = max(2, int(0.50 * len(all_values)))  
+            signal = max(2, int(0.15 * len(all_values))) 
+            df[['MACD', 'MACD_signal', 'MACD_histogram']] = ta.macd(df['close'], fast=fast, slow=slow, signal=signal)
+            macd_value = df['MACD'].iloc[-1]
+            length = max(10, int(0.5 * len(all_values)))
+            bbands = ta.bbands(df['close'], length=length, std=2)
+            upperband = bbands['BBL_' + str(length) + '_2.0'].iloc[-1] 
+            middleband = bbands['BBM_' + str(length) + '_2.0'].iloc[-1]
+            lowerband = bbands['BBU_' + str(length) + '_2.0'].iloc[-1]
+            del df
+
+            # print("RSI: ", rsi_value)
+            # print("MACD: ", macd_value)
+            # print("BBANDS: ", upperband, middleband, lowerband)
+            last_3_values_str = [str(value.tolist()) for value in x_enc[b, -3:, 0]]
 
             prompt_ = (
                 f"<|start_prompt|>Dataset description: The stock price fluctuation over time. "
@@ -117,9 +139,12 @@ class Model(nn.Module):
                 f"max value {max_values_str}, "
                 f"median value {median_values_str}, "
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
-                f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
-                # f"top {self.top_k} lags are : {lags_values_str}, "
-                # f"last 5 values are : {', '.join(last_5_values_str)}<|<end_prompt>|>"
+                # f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
+                f"top {self.top_k} lags are : {lags_values_str}, "
+                f"RSI value: {rsi_value}, " 
+                f"MACD value: {macd_value}, "
+                f"BBANDS values: Upperband: {upperband}, Middleband: {middleband}, Lowerband: {lowerband}, "
+                f"last 3 values are : {', '.join(last_3_values_str)}<|<end_prompt>|>"
             )
             # print(prompt_)
             prompt.append(prompt_)

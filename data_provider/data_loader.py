@@ -204,6 +204,7 @@ class Dataset_Custom(Dataset):
         self.seq_len = size[0]
         self.label_len = size[1]
         self.pred_len = size[2]
+        self.seq_step = 7 # TODO: add as parameter
         # init
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
@@ -226,7 +227,7 @@ class Dataset_Custom(Dataset):
         self.data_path = data_path
         self.__read_data__()
         self.enc_in = self.data_x.shape[-1]
-        self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
+        self.tot_len = len(self.data_x) - (self.seq_len + self.pred_len)*self.seq_step + 1
 
     def __read_data__(self):
         self.scaler = StandardScaler()
@@ -301,13 +302,13 @@ class Dataset_Custom(Dataset):
         #TODO: overcomplicated indexing, why not return all columns in particural index?
         feat_id = index // self.tot_len
         s_begin = index % self.tot_len
-        s_end = s_begin + self.seq_len
-        r_begin = s_end - self.label_len
-        r_end = r_begin + self.label_len + self.pred_len
-        seq_x = self.data_x[s_begin:s_end, feat_id:feat_id + 1]
-        seq_y = self.data_y[r_begin:r_end, feat_id:feat_id + 1]
-        seq_x_mark = self.data_stamp[s_begin:s_end]
-        seq_y_mark = self.data_stamp[r_begin:r_end]
+        s_end = s_begin + self.seq_len * self.seq_step
+        r_begin = s_end - self.label_len * self.seq_step
+        r_end = r_begin + (self.label_len + self.pred_len) * self.seq_step
+        seq_x = self.data_x[s_begin:s_end:self.seq_step, feat_id:feat_id + 1]
+        seq_y = self.data_y[r_begin:r_end:self.seq_step, feat_id:feat_id + 1]
+        seq_x_mark = self.data_stamp[s_begin:s_end:self.seq_step]
+        seq_y_mark = self.data_stamp[r_begin:r_end:self.seq_step]
 
         return seq_x, seq_y, seq_x_mark, seq_y_mark
 
