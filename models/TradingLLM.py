@@ -25,6 +25,7 @@ class FlattenHead(nn.Module):
         x = self.dropout(x)
         return x
 
+
 class Model(nn.Module):
 
     def __init__(self, configs, patch_len=16, stride=8):
@@ -68,11 +69,10 @@ class Model(nn.Module):
         self.dropout = nn.Dropout(configs.dropout)
 
         self.patch_embedding = PatchEmbedding(
-          configs.d_model, self.patch_len, self.stride, configs.dropout)
-        
+            configs.d_model, self.patch_len, self.stride, configs.dropout)
+
         # TODO: uncomment and test
         # self.data_embedding = DataEmbedding(c_in=7, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
-                                           
 
         self.word_embeddings = self.llama.get_input_embeddings().weight
         self.vocab_size = self.word_embeddings.shape[0]
@@ -108,20 +108,21 @@ class Model(nn.Module):
             max_values_str = str(max_values[b].tolist()[0])
             median_values_str = str(medians[b].tolist()[0])
             lags_values_str = str(lags[b].tolist())
-            # TODO: uncomment when talib is installed
+            
             all_values = [value.tolist() for value in x_enc[b, :, 0]]
             df = pd.DataFrame(all_values, columns=['close'])
             length = max(8, int(0.4 * len(all_values)))
             df['RSI'] = ta.rsi(df['close'], length=length)
             rsi_value = df['RSI'].iloc[-1]
-            fast = max(2, int(0.20 * len(all_values)))  
-            slow = max(2, int(0.50 * len(all_values)))  
-            signal = max(2, int(0.15 * len(all_values))) 
-            df[['MACD', 'MACD_signal', 'MACD_histogram']] = ta.macd(df['close'], fast=fast, slow=slow, signal=signal)
+            fast = max(2, int(0.20 * len(all_values)))
+            slow = max(2, int(0.50 * len(all_values)))
+            signal = max(2, int(0.15 * len(all_values)))
+            df[['MACD', 'MACD_signal', 'MACD_histogram']] = ta.macd(
+                df['close'], fast=fast, slow=slow, signal=signal)
             macd_value = df['MACD'].iloc[-1]
             length = max(10, int(0.5 * len(all_values)))
             bbands = ta.bbands(df['close'], length=length, std=2)
-            upperband = bbands['BBL_' + str(length) + '_2.0'].iloc[-1] 
+            upperband = bbands['BBL_' + str(length) + '_2.0'].iloc[-1]
             middleband = bbands['BBM_' + str(length) + '_2.0'].iloc[-1]
             lowerband = bbands['BBU_' + str(length) + '_2.0'].iloc[-1]
             del df
@@ -129,7 +130,8 @@ class Model(nn.Module):
             # print("RSI: ", rsi_value)
             # print("MACD: ", macd_value)
             # print("BBANDS: ", upperband, middleband, lowerband)
-            last_3_values_str = [str(value.tolist()) for value in x_enc[b, -3:, 0]]
+            last_3_values_str = [str(value.tolist())
+                                 for value in x_enc[b, -3:, 0]]
 
             prompt_ = (
                 f"<|start_prompt|>Dataset description: The stock price fluctuation over time. "
@@ -141,7 +143,7 @@ class Model(nn.Module):
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
                 # f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
                 f"top {self.top_k} lags are : {lags_values_str}, "
-                f"RSI value: {rsi_value}, " 
+                f"RSI value: {rsi_value}, "
                 f"MACD value: {macd_value}, "
                 f"BBANDS values: Upperband: {upperband}, Middleband: {middleband}, Lowerband: {lowerband}, "
                 f"last 3 values are : {', '.join(last_3_values_str)}<|<end_prompt>|>"
