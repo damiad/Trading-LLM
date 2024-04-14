@@ -198,12 +198,12 @@ class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h',
-                 seasonal_patterns=None, to_remove=[], date_col='date', do_shift=False):
+                 seasonal_patterns=None, to_remove=[], date_col='date', do_shift=False, seq_step=1):
         assert size != None
         self.seq_len = size[0]
         self.label_len = size[1]
         self.pred_len = size[2]
-        self.seq_step = 7  # TODO: add as parameter
+        self.seq_step = seq_step  # TODO: add as parameter
         # init
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
@@ -339,3 +339,13 @@ class Dataset_Sine_01(Dataset_Custom):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col)
+
+class Dataset_NUMSOLD_day(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='NUMSOLD-train.csv',
+                 # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 target='number_sold', scale=True, timeenc=0, freq='d',
+                 seasonal_patterns=None, to_remove=['store','product'], date_col='Date'):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)

@@ -1,4 +1,4 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_GBPCAD_hour, Dataset_Sine_01
+from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_GBPCAD_hour, Dataset_Sine_01, Dataset_NUMSOLD_day
 from torch.utils.data import DataLoader
 
 data_dict = {
@@ -8,7 +8,8 @@ data_dict = {
     'ETTm2': Dataset_ETT_minute,
     'custom': Dataset_Custom,
     'gbpcad' : Dataset_GBPCAD_hour,
-    'sine' : Dataset_Sine_01
+    'sine' : Dataset_Sine_01,
+    'numsold' : Dataset_NUMSOLD_day
 }
 
 

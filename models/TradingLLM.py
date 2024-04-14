@@ -135,18 +135,18 @@ class Model(nn.Module):
 
             prompt_ = (
                 f"<|start_prompt|>Dataset description: The stock price fluctuation over time. "
-                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps information. "
+                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps. "
                 "Input statistics: "
                 f"min value {min_values_str}, "
                 f"max value {max_values_str}, "
                 f"median value {median_values_str}, "
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
-                # f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
-                f"top {self.top_k} lags are : {lags_values_str}, "
-                f"RSI value: {rsi_value}, "
-                f"MACD value: {macd_value}, "
-                f"BBANDS values: Upperband: {upperband}, Middleband: {middleband}, Lowerband: {lowerband}, "
-                f"last 3 values are : {', '.join(last_3_values_str)}<|<end_prompt>|>"
+                f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
+                # f"top {self.top_k} lags are : {lags_values_str}, "
+                # f"RSI value: {rsi_value}, "
+                # f"MACD value: {macd_value}, "
+                # f"BBANDS values: Upperband: {upperband}, Middleband: {middleband}, Lowerband: {lowerband}, "
+                # f"last 3 values are : {', '.join(last_3_values_str)}<|<end_prompt>|>"
             )
             # print(prompt_)
             prompt.append(prompt_)

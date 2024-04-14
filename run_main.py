@@ -13,6 +13,7 @@ from accelerate import Accelerator, DeepSpeedPlugin
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
+# from torchmetrics.regression import MeanAbsolutePercentageError
 
 from models import TimeLLM, TradingLLM
 
@@ -112,6 +113,7 @@ for ii in range(args.itr):
 
     criterion = nn.MSELoss()
     # criterion = nn.L1Loss()
+
     mae_metric = nn.L1Loss()
 
     train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler = (
@@ -221,8 +223,8 @@ for ii in range(args.itr):
             args, accelerator, model, test_data, test_loader, criterion, mae_metric
         )
         accelerator.print(
-            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG_train: {5:.7f} CG: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} ".format(
-                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, np.mean(train_cg_loss), test_metrics.cg0, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG_train: {5:.7f} CG: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} MAPE: {10:.7f} ".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, np.mean(train_cg_loss), test_metrics.cg0, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi, vali_metrics.mape
             )
         )
         reswriter.writerow([epoch+1, time.time() - epoch_time,

@@ -1,10 +1,12 @@
 import numpy as np
 import torch
+from torchmetrics.regression import MeanAbsolutePercentageError
 
 class Metrics:
     def __init__(self, j, cg_value ):
         self.j = j
         self.cg_value = cg_value
+        self.mape_error = MeanAbsolutePercentageError().to('cuda')
         self.rse = []
         self.corr = []
         self.mae = []
@@ -15,6 +17,7 @@ class Metrics:
         self.cg0 = []
         self.cgd = []
         self.cgi = []
+        self.mape = []
     def append(self, last_val, pred, true):
         #has to be written in torch not np
         # self.rse.append(RSE(pred, true))
@@ -27,6 +30,7 @@ class Metrics:
         self.cg0.append(CG(self.cg_value, last_val, pred, true))
         self.cgd.append(CGD(last_val, pred, true))
         self.cgi.append(CGI(self.j, last_val, pred, true))
+        self.mape.append(self.mape_error(pred, true).item())
     def compute(self):
         self.rse = np.mean(self.rse)
         self.corr = np.mean(self.corr)
@@ -38,6 +42,7 @@ class Metrics:
         self.cg0 = np.mean(self.cg0)
         self.cgd = np.mean(self.cgd)
         self.cgi = np.mean(self.cgi)
+        self.mape = np.mean(self.mape)
 
 
 
