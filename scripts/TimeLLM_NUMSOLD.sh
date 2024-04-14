@@ -23,6 +23,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--seq_len 64 \
 	--label_len 0 \
 	--pred_len 15 \
+	--seq_step  1 \
 	--target 'number_sold' \
 	--itr 1 \
 	--d_model $d_model \

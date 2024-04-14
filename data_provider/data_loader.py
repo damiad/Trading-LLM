@@ -325,27 +325,28 @@ class Dataset_GBPCAD_hour(Dataset_Custom):
                  data_path='gbpcad_one_hour_202311210827.csv',
                  # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
                  target='close', scale=True, timeenc=0, freq='h',
-                 seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp', 'open', 'spread', 'usdPerPips', 'ask_volume', 'volume', 'ask_open', 'ask_low', 'ask_high', 'ask_close', 'ask_close', 'low', 'high'], date_col='barTimestamp'):
+                 seasonal_patterns=None, to_remove=['id', 'provider', 'dayOfWeek', 'insertTimestamp', 'open', 'spread', 'usdPerPips', 'ask_volume', 'volume', 'ask_open', 'ask_low', 'ask_high', 'ask_close', 'ask_close', 'low', 'high'], 
+                 date_col='barTimestamp', seq_step=1):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
-                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
 
 
 class Dataset_Sine_01(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  data_path='sine.csv',
                  target='target', scale=True, timeenc=0, freq='h',
-                 seasonal_patterns=None, to_remove=[], date_col='date'):
+                 seasonal_patterns=None, to_remove=[], date_col='date', seq_step=1):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
-                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col)
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, seq_step=seq_step)
 
 class Dataset_NUMSOLD_day(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  data_path='NUMSOLD-train.csv',
                  # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
                  target='number_sold', scale=True, timeenc=0, freq='d',
-                 seasonal_patterns=None, to_remove=['store','product'], date_col='Date'):
+                 seasonal_patterns=None, to_remove=['store','product'], date_col='Date', seq_step=1):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
-                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True)
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)

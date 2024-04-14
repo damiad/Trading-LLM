@@ -23,6 +23,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--seq_len 40 \
 	--label_len 0 \
 	--pred_len 6 \
+	--seq_step 2 \
 	--target 'close' \
 	--itr 1 \
 	--d_model $d_model \
@@ -34,6 +35,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_comment $comment \
 	--lradj 'type3' \
 	--cg_value 3 \
-	--patience 20
+	--patience 20 
+	
 
 # patience add

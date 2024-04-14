@@ -94,5 +94,6 @@ def get_args():
 
     #custom 
     parser.add_argument('--cg_value', type=int, default=1)
+    parser.add_argument('--seq_step', type=int, default=1)
 
     return parser.parse_args()

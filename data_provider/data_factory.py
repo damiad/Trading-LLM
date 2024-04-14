@@ -39,7 +39,8 @@ def data_provider(args, flag):
         target=args.target,
         timeenc=timeenc,
         freq=freq,
-        seasonal_patterns=args.seasonal_patterns
+        seasonal_patterns=args.seasonal_patterns,
+        seq_step=args.seq_step
     )
     data_loader = DataLoader(
         data_set,
