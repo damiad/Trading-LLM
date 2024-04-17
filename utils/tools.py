@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 import shutil
 
 from tqdm import tqdm
-from utils.metrics import CG0, Metrics
+from utils.metrics import Metrics
 
 plt.switch_backend('agg')
 
+def format_arr(np_arr):
+    formatter = {'float_kind': lambda x: "{:.4f}".format(x)}
+    return np.array2string(np_arr, formatter=formatter)
 
 def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printout=True):
     if args.lradj == 'type1':

@@ -14,7 +14,7 @@ class Metrics:
         self.rmse = []
         self.mape = []
         self.mspe = []
-        self.cg0 = []
+        self.cg = []
         self.cgd = []
         self.cgi = []
         self.mape = []
@@ -27,7 +27,7 @@ class Metrics:
         # self.rmse.append(RMSE(pred, true))
         # self.mape.append(MAPE(pred, true))
         # self.mspe.append(MSPE(pred, true))
-        self.cg0.append(CG(self.cg_value, last_val, pred, true))
+        self.cg.append(CG_arr(last_val, pred, true))
         self.cgd.append(CGD(last_val, pred, true))
         self.cgi.append(CGI(self.j, last_val, pred, true))
         self.mape.append(self.mape_error(pred, true).item())
@@ -39,7 +39,7 @@ class Metrics:
         self.rmse = np.mean(self.rmse)
         self.mape = np.mean(self.mape)
         self.mspe = np.mean(self.mspe)
-        self.cg0 = np.mean(self.cg0)
+        self.cg = np.mean(self.cg, axis=0)
         self.cgd = np.mean(self.cgd)
         self.cgi = np.mean(self.cgi)
         self.mape = np.mean(self.mape)
@@ -86,6 +86,10 @@ def CG(k, last_val, pred, true):
     count = torch.sum(pred_deltas == true_deltas)
     return count.item() /  pred_deltas.numel()
 
+def CG_arr(last_val, pred, true):
+    return [CG(k, last_val, pred, true) for k in range(1, pred.size(1) + 1)]
+
+
 def CG_AVG(k, d, last_val, pred, true):
     k -= 1
     assert(k + d < pred.size(1) and k - d >= 0)
@@ -102,20 +106,6 @@ def CG_AVG(k, d, last_val, pred, true):
 
 
 
-#can be optimised
-#not ideal cus we only compare to the first value. 
-#maybe should move to np
-#0 cuz with respect to the first value
-# for now only check the first value
-def CG0(last_val, pred, true):
-    last_val = last_val.view(-1, 1, pred.size(-1)).expand(-1, pred.size(1), pred.size(2))
-    pred_deltas = torch.sign(pred - last_val)
-    true_deltas = torch.sign(true - last_val)
-    pred_deltas = pred_deltas[:,0,:]
-    true_deltas = true_deltas[:,0,:]
-    count = torch.sum(pred_deltas == true_deltas)
-    # return count.item()
-    return count.item() / pred_deltas.numel()
 
 #now we define accuracy as the % of correctly guessed directions
 #D cuz directions

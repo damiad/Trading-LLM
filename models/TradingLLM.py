@@ -33,7 +33,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
-        self.top_k = 4  # TODO: could be parameter, see forward and calculate lags
+        self.top_k = 5  # TODO: could be parameter, see forward and calculate lags
         self.d_llm = 4096
         self.patch_len = configs.patch_len
         self.stride = configs.stride
@@ -134,21 +134,20 @@ class Model(nn.Module):
                                  for value in x_enc[b, -3:, 0]]
 
             prompt_ = (
-                f"<|start_prompt|>Dataset description: The stock price fluctuation over time. "
-                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps. "
+                f"<|start_prompt|>Dataset description: Predict stock price fluctuation over time. "
+                f"Task description: forecast next {str(self.pred_len)} values given previous {str(self.seq_len)} steps. "
                 "Input statistics: "
                 f"min value {min_values_str}, "
                 f"max value {max_values_str}, "
                 f"median value {median_values_str}, "
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
-                f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
-                # f"top {self.top_k} lags are : {lags_values_str}, "
-                # f"RSI value: {rsi_value}, "
-                # f"MACD value: {macd_value}, "
-                # f"BBANDS values: Upperband: {upperband}, Middleband: {middleband}, Lowerband: {lowerband}, "
-                # f"last 3 values are : {', '.join(last_3_values_str)}<|<end_prompt>|>"
+                # f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
+                f"top {self.top_k} lags are : {lags_values_str}, "
+                f"RSI value: {rsi_value:.2f}, "
+                f"MACD value: {macd_value:.2f}, "
+                f"BBANDS values: Upperband: {upperband:.2f}, Middleband: {middleband:.2f}, Lowerband: {lowerband:.2f}, "
+                f"last 3 values are : {', '.join(last_3_values_str)}<|<end_prompt>|>"
             )
-            # print(prompt_)
             prompt.append(prompt_)
 
         x_enc = x_enc.reshape(B, N, T).permute(0, 2, 1).contiguous()

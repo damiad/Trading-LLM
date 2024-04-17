@@ -5,12 +5,12 @@ llama_layers=32
 
 master_port=1234
 num_process=1
-batch_size=5 #24
+batch_size=6 #24
 d_model=32
 d_ff=128
-num_entries=20000
+num_entries=40000
 
-comment='20k-type1-beginning-bigpred'
+comment='40k-ending-newparams'
 
 python3 dataset/ETT-small/cut.py $num_entries
 
@@ -20,10 +20,10 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_id GBPCAD \
 	--model $model_name \
 	--data gbpcad \
-	--seq_len 40 \
+	--seq_len 64 \
 	--label_len 0 \
 	--pred_len 6 \
-	--seq_step 2 \
+	--seq_step 7 \
 	--target 'close' \
 	--itr 1 \
 	--d_model $d_model \
@@ -34,7 +34,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--train_epochs $train_epochs \
 	--model_comment $comment \
 	--lradj 'type3' \
-	--cg_value 3 \
+	--cg_value 10 \
 	--patience 20 
 	
 

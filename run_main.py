@@ -6,8 +6,9 @@ from utils.tools import (
     vali,
     load_content,
     generate_pathname,
+    format_arr
 )
-from utils.metrics import CG0, CGD, CGI, CG, CG_AVG
+from utils.metrics import CGD, CGI, CG, CG_AVG, CG_arr
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
 from torch import nn, optim
@@ -67,8 +68,8 @@ for ii in range(args.itr):
     with open(path + '/' + 'args', 'w+') as f:
         json.dump(args.__dict__, f, indent=2)
 
-    res_header = ["Epoch", "Cost", "TrainLoss",
-                  "ValiLoss", "TestLoss", "MAELoss", "TestCG", "TestCGD", "TestCGI", "ValiCG", "ValiCGD", "ValiCGI", "TrainCG"]
+    res_header = ["Epoch", "LearningRate", "TrainLoss",
+                  "ValiLoss", "TestLoss", "MAELoss", "MAPELoss", "TrainCG", "TestCG", "TestCGI", "ValiCG", "ValiCGI"]
 
     csvres = open(path+'/results.csv', 'w+')
     reswriter = csv.writer(csvres)
@@ -186,7 +187,7 @@ for ii in range(args.itr):
             last_vals.detach()
             outputs.detach()
             batch_y.detach()
-            train_cg_loss.append(CG(args.cg_value, last_vals, outputs, batch_y))
+            train_cg_loss.append(CG_arr(last_vals, outputs, batch_y))
             
 
             
@@ -195,8 +196,8 @@ for ii in range(args.itr):
                 left_time = speed * \
                     ((args.train_epochs - epoch) * train_steps - i)
                 accelerator.print(
-                    "\tspeed: {:.4f}s/iter; left time: {:.4f}s, CG: {:.4f}".format(
-                        speed, left_time, np.mean(train_cg_loss))
+                    "\tspeed: {:.4f}s/iter; left time: {:.4f}s, CG: ".format(
+                        speed, left_time) + str(np.mean(train_cg_loss, axis=0)[:args.cg_value])
                 )
                 # print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                 iter_count = 0
@@ -223,13 +224,16 @@ for ii in range(args.itr):
             args, accelerator, model, test_data, test_loader, criterion, mae_metric
         )
         accelerator.print(
-            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}  CG_train: {5:.7f} CG: {6:.7f}  CGI: {7:.7f} CG0_vali: {8:.7f} CGI_vali: {9:.7f} MAPE: {10:.7f} ".format(
-                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, np.mean(train_cg_loss), test_metrics.cg0, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgi, vali_metrics.mape
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f} MAPE Loss: {5:.7f} CG_train: {6} CG_train: {7} CG0_vali: {8} ".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.mape, format_arr(np.mean(train_cg_loss, axis=0)[:args.cg_value]), format_arr(test_metrics.cg[:args.cg_value]), format_arr(vali_metrics.cg[:args.cg_value])
             )
         )
-        reswriter.writerow([epoch+1, time.time() - epoch_time,
-                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.cg0, test_metrics.cgd, test_metrics.cgi, vali_metrics.cg0, vali_metrics.cgd, vali_metrics.cgi, np.mean(train_cg_loss)])
+        #["Epoch", "LearningRate", "TrainLoss", "ValiLoss", "TestLoss", "MAELoss", "MAPELoss", "TrainCG", "TestCG", "TestCGI", "ValiCG", "ValiCGI"]
+        reswriter.writerow([epoch+1, model_optim.param_groups[0]["lr"],
+                           train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.mape, np.mean(train_cg_loss, axis=0), test_metrics.cg, test_metrics.cgi, vali_metrics.cg, vali_metrics.cgi])
         csvres.flush()
+
+        #generate image
 
         early_stopping(vali_loss, model, path)
         if early_stopping.early_stop:
