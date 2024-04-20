@@ -10,7 +10,7 @@ d_model=32
 d_ff=128
 num_entries=40000
 
-comment='40k-ending-newparams'
+comment='${num_entries}-ending-5by2'
 
 python3 dataset/ETT-small/cut.py $num_entries
 
@@ -20,10 +20,10 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_id GBPCAD \
 	--model $model_name \
 	--data gbpcad \
-	--seq_len 64 \
+	--seq_len 18 \
 	--label_len 0 \
-	--pred_len 6 \
-	--seq_step 7 \
+	--pred_len 5 \
+	--seq_step 2 \
 	--target 'close' \
 	--itr 1 \
 	--d_model $d_model \
@@ -33,9 +33,8 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--llm_layers $llama_layers \
 	--train_epochs $train_epochs \
 	--model_comment $comment \
-	--lradj 'type3' \
-	--cg_value 10 \
-	--patience 20 
-	
+	--lradj 'type1' \
+	--cg_value 5 \
+	--patience 20
 
 # patience add

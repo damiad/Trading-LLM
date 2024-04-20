@@ -203,24 +203,19 @@ class Dataset_Custom(Dataset):
         self.seq_len = size[0]
         self.label_len = size[1]
         self.pred_len = size[2]
-        self.seq_step = seq_step  # TODO: add as parameter
-        # init
+        self.seq_step = seq_step
+
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
-
         self.target = target
         self.scale = scale
-
         self.timeenc = timeenc
         self.freq = freq
         self.do_shift = do_shift
 
-        # change here
-        # self.scale = False
         self.to_remove = to_remove
         self.date_col = date_col
-        ##
 
         self.root_path = root_path
         self.data_path = data_path
@@ -233,22 +228,8 @@ class Dataset_Custom(Dataset):
         self.scaler = StandardScaler()
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
-        # change
         df_raw.rename(columns={self.date_col: 'date'}, inplace=True)
-        # print("columns from where we remove: ", df_raw.columns)
         df_raw.drop(self.to_remove, axis=1, inplace=True)
-        # column_names = list(df_raw.columns)
-        # column_names.remove(self.target)
-        # column_names.remove('date')
-        # column_names.insert(0, 'date')
-        # column_names.append(self.target)
-        # df_raw = df_raw[column_names]
-
-        # if self.do_shift:
-        #     df_raw[f"{self.target}_1"] = df_raw[self.target]
-        #     df_raw[self.target] = df_raw[self.target].shift(1)
-        # df_raw.dropna(inplace=True)
-        ##
 
         '''
         df_raw.columns: ['date', ...(other features), target feature]
@@ -276,8 +257,6 @@ class Dataset_Custom(Dataset):
         else:
             data = df_data.values
 
-        # we set data as all columns but date
-
         df_stamp = df_raw[['date']][border1:border2]
         df_stamp['date'] = pd.to_datetime(df_stamp.date)
         if self.timeenc == 0:
@@ -292,8 +271,6 @@ class Dataset_Custom(Dataset):
                 df_stamp['date'].values), freq=self.freq)
             data_stamp = data_stamp.transpose(1, 0)
 
-        # print("data len: ", border2-border1)
-        # print(df_data[border1s[0]:border2s[0]].info())
         self.data_x = data[border1:border2]
         # TODO: let data y be our target column only (with data_stamp for __getitem__)
         self.data_y = data[border1:border2]
