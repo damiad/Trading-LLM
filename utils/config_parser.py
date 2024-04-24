@@ -89,7 +89,6 @@ def get_args():
                         help='adjust learning rate')
     parser.add_argument('--pct_start', type=float,
                         default=0.2, help='pct_start')
-    # parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
     parser.add_argument('--llm_layers', type=int, default=6)
 
     #custom 

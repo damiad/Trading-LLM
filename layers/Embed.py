@@ -118,12 +118,14 @@ class DataEmbedding(nn.Module): #TODO: try using this one (c_in could be 7)
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
+        n_vars = x.shape[1] # Added this line
         if x_mark is None:
             x = self.value_embedding(x) + self.position_embedding(x).to(x.device)
         else:
             x = self.value_embedding(
                 x) + self.temporal_embedding(x_mark) + self.position_embedding(x)
-        return self.dropout(x)
+        # return self.dropout(x)
+        return self.dropout(x), n_vars # Our change
 
 
 class DataEmbedding_wo_pos(nn.Module):

@@ -16,7 +16,7 @@ from torch.optim import lr_scheduler
 from tqdm import tqdm
 # from torchmetrics.regression import MeanAbsolutePercentageError
 
-from models import TimeLLM, TradingLLM
+from models import TradingLLM
 
 from data_provider.data_factory import data_provider
 
@@ -42,25 +42,21 @@ deepspeed_plugin = DeepSpeedPlugin(hf_ds_config="./ds_config_zero2.json")
 accelerator = Accelerator(deepspeed_plugin=deepspeed_plugin)
 
 
-# file = open("logs/example.txt", 'w')
 for ii in range(args.itr):
-
     train_data, train_loader = data_provider(args, "train")
     vali_data, vali_loader = data_provider(args, "val")
     test_data, test_loader = data_provider(args, "test")
-    # print(train_data.values)
 
     if args.model == "TradingLLM":
         model = TradingLLM.Model(args).float()
     else:
-        model = TimeLLM.Model(args).float()
+        raise ValueError("Unsupported model: {}".format(args.model))
 
     # creating a unique name for the model
     setting = generate_pathname(args, ii)
-
     path = os.path.join(
         args.checkpoints, setting + "-" + args.model_comment
-    )  # unique checkpoint saving path
+    ) 
 
     # save model arguments
     if not os.path.exists(path):
@@ -76,7 +72,7 @@ for ii in range(args.itr):
     reswriter.writerow(res_header)
 
     # load prompt to args.content
-    args.content = load_content(args)
+    # args.content = load_content(args)
     if not os.path.exists(path) and accelerator.is_local_main_process:
         os.makedirs(path)
 
@@ -98,7 +94,6 @@ for ii in range(args.itr):
     
 
     # create scheduler
-
     if args.lradj == "COS":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             model_optim, T_max=20, eta_min=1e-8
@@ -114,19 +109,18 @@ for ii in range(args.itr):
 
     criterion = nn.MSELoss()
     # criterion = nn.L1Loss()
-
     mae_metric = nn.L1Loss()
-
     train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler = (
         accelerator.prepare(
             train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler
         )
     )
 
+    
+
     for epoch in range(args.train_epochs):
         iter_count = 0
         train_loss = []
-
         model.train()
         epoch_time = time.time()
         train_cg_loss = []
@@ -137,17 +131,12 @@ for ii in range(args.itr):
             
             iter_count += 1
             model_optim.zero_grad()
-            # print("batch dimensions: ", batch_x.size())
-
-            # accelerator.print(batch_x, batch_x_mark)
-
             batch_x = batch_x.float().to(accelerator.device)
             batch_y = batch_y.float().to(accelerator.device)
             batch_x_mark = batch_x_mark.float().to(accelerator.device)
             batch_y_mark = batch_y_mark.float().to(accelerator.device)
 
             # decoder input
-            # acceleerate is using this somehow
             dec_inp = (
                 torch.zeros_like(batch_y[:, -args.pred_len:, :])
                 .float()
@@ -174,6 +163,16 @@ for ii in range(args.itr):
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:, f_dim:]
 
+            # ! Binary convertion:
+            # outputs_b = (outputs > last_vals.unsqueeze(1).repeat(1, args.pred_len, 1)).float()
+            # batch_y_b = (batch_y > last_vals.unsqueeze(1).repeat(1, args.pred_len, 1)).float()
+            # criterion = nn.BCELoss()
+            # loss = criterion(outputs_b, batch_y_b)
+            # outputs_b.detach()
+            # batch_y_b.detach()
+            # Uncomment above to use binary loss - and comment out loss = criterion(outputs, batch_y)
+
+
             #TODO: Cropping because beggining may be unpredictible and we don't care about later records
             # Obviously this could be param (if it will work), 
             # we can also tell to model what to predict actually (prompt and dataloader)
@@ -199,7 +198,6 @@ for ii in range(args.itr):
                     "\tspeed: {:.4f}s/iter; left time: {:.4f}s, CG: ".format(
                         speed, left_time) + str(np.mean(train_cg_loss, axis=0)[:args.cg_value])
                 )
-                # print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                 iter_count = 0
                 time_now = time.time()
 
@@ -224,7 +222,7 @@ for ii in range(args.itr):
             args, accelerator, model, test_data, test_loader, criterion, mae_metric
         )
         accelerator.print(
-            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f} MAPE Loss: {5:.7f} CG_train: {6} CG_train: {7} CG0_vali: {8} ".format(
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f} MAPE Loss: {5:.7f} CG_train: {6} CG_test: {7} CG_vali: {8} ".format(
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.mape, format_arr(np.mean(train_cg_loss, axis=0)[:args.cg_value]), format_arr(test_metrics.cg[:args.cg_value]), format_arr(vali_metrics.cg[:args.cg_value])
             )
         )
@@ -269,5 +267,4 @@ if accelerator.is_local_main_process:
     path = "./checkpoints"  # unique checkpoint saving path
     # del_files(path)  # delete checkpoint files
     accelerator.print("success delete checkpoints")
-# file.close()
     csvres.close()

@@ -72,7 +72,7 @@ class Model(nn.Module):
             configs.d_model, self.patch_len, self.stride, configs.dropout)
 
         # TODO: uncomment and test
-        # self.data_embedding = DataEmbedding(c_in=7, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
+        self.data_embedding = DataEmbedding(c_in=100, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
 
         self.word_embeddings = self.llama.get_input_embeddings().weight
         self.vocab_size = self.word_embeddings.shape[0]
@@ -157,12 +157,11 @@ class Model(nn.Module):
             prompt.to(x_enc.device))  # (batch, prompt_token, dim)
         source_embeddings = self.mapping_layer(
             self.word_embeddings.permute(1, 0)).permute(1, 0)
+        
         x_enc = x_enc.permute(0, 2, 1).contiguous()
-        enc_out, n_vars = self.patch_embedding(x_enc.to(torch.bfloat16))
+        # enc_out, n_vars = self.patch_embedding(x_enc.to(torch.bfloat16))
         # TODO: uncomment and test
-        # enc_out = self.data_embedding(x_enc.to(torch.bfloat16), x_mark_enc.to(torch.bfloat16))
-        # n_vars = enc_out[1] # Not sure if correct
-        # enc_out = enc_out[0]
+        enc_out, n_vars = self.data_embedding(x_enc.to(torch.bfloat16), x_mark_enc.to(torch.bfloat16))
         enc_out = self.reprogramming_layer(
             enc_out, source_embeddings, source_embeddings)
         llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)
@@ -176,7 +175,6 @@ class Model(nn.Module):
         dec_out = self.normalize_layers(dec_out, 'denorm')
         return dec_out
 
-    # TODO: maybe we could improve it somehow, or at least try and compare results
     def calculate_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
         k_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
