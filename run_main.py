@@ -56,7 +56,7 @@ for ii in range(args.itr):
     setting = generate_pathname(args, ii)
     path = os.path.join(
         args.checkpoints, setting + "-" + args.model_comment
-    ) 
+    )
 
     # save model arguments
     if not os.path.exists(path):
@@ -91,7 +91,6 @@ for ii in range(args.itr):
             trained_parameters.append(p)
 
     model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
-    
 
     # create scheduler
     if args.lradj == "COS":
@@ -108,15 +107,15 @@ for ii in range(args.itr):
         )
 
     criterion = nn.MSELoss()
+    # criterion = nn.BCELoss()
     # criterion = nn.L1Loss()
     mae_metric = nn.L1Loss()
+
     train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler = (
         accelerator.prepare(
             train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler
         )
     )
-
-    
 
     for epoch in range(args.train_epochs):
         iter_count = 0
@@ -128,7 +127,7 @@ for ii in range(args.itr):
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(
             enumerate(train_loader)
         ):
-            
+
             iter_count += 1
             model_optim.zero_grad()
             batch_x = batch_x.float().to(accelerator.device)
@@ -155,8 +154,6 @@ for ii in range(args.itr):
             else:
                 outputs = model(batch_x, batch_x_mark,
                                 dec_inp, batch_y_mark)
-            
-            
 
             f_dim = 0
             last_vals = batch_x[:, -1, f_dim:]
@@ -172,11 +169,10 @@ for ii in range(args.itr):
             # batch_y_b.detach()
             # Uncomment above to use binary loss - and comment out loss = criterion(outputs, batch_y)
 
-
-            #TODO: Cropping because beggining may be unpredictible and we don't care about later records
-            # Obviously this could be param (if it will work), 
+            # TODO: Cropping because beggining may be unpredictible and we don't care about later records
+            # Obviously this could be param (if it will work),
             # we can also tell to model what to predict actually (prompt and dataloader)
-            # outputs = outputs[:, 7:12, :] 
+            # outputs = outputs[:, 7:12, :]
             # batch_y = batch_y[:, 7:12, :]
             ###################################################################
 
@@ -187,9 +183,7 @@ for ii in range(args.itr):
             outputs.detach()
             batch_y.detach()
             train_cg_loss.append(CG_arr(last_vals, outputs, batch_y))
-            
 
-            
             if (i + 1) % 100 == 0:
                 speed = (time.time() - time_now) / iter_count
                 left_time = speed * \
@@ -223,15 +217,16 @@ for ii in range(args.itr):
         )
         accelerator.print(
             "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f} MAPE Loss: {5:.7f} CG_train: {6} CG_test: {7} CG_vali: {8} ".format(
-                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.mape, format_arr(np.mean(train_cg_loss, axis=0)[:args.cg_value]), format_arr(test_metrics.cg[:args.cg_value]), format_arr(vali_metrics.cg[:args.cg_value])
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.mape, format_arr(np.mean(
+                    train_cg_loss, axis=0)[:args.cg_value]), format_arr(test_metrics.cg[:args.cg_value]), format_arr(vali_metrics.cg[:args.cg_value])
             )
         )
-        #["Epoch", "LearningRate", "TrainLoss", "ValiLoss", "TestLoss", "MAELoss", "MAPELoss", "TrainCG", "TestCG", "TestCGI", "ValiCG", "ValiCGI"]
+        # ["Epoch", "LearningRate", "TrainLoss", "ValiLoss", "TestLoss", "MAELoss", "MAPELoss", "TrainCG", "TestCG", "TestCGI", "ValiCG", "ValiCGI"]
         reswriter.writerow([epoch+1, model_optim.param_groups[0]["lr"],
                            train_loss, vali_loss, test_loss, test_mae_loss, test_metrics.mape, np.mean(train_cg_loss, axis=0), test_metrics.cg, test_metrics.cgi, vali_metrics.cg, vali_metrics.cgi])
         csvres.flush()
 
-        #generate image
+        # generate image
 
         early_stopping(vali_loss, model, path)
         if early_stopping.early_stop:

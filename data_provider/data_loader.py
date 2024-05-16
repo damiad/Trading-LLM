@@ -338,3 +338,12 @@ class Dataset_EURUSD_hour(Dataset_Custom):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
+
+class Dataset_AAPL(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='AAPL.csv',
+                 target='Close', scale=True, timeenc=0, freq='d',
+                 seasonal_patterns=None, to_remove=[], date_col='Date', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, seq_step=seq_step)

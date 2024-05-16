@@ -21,9 +21,8 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
             10: 5e-7, 15: 1e-7, 20: 5e-8
         }
     elif args.lradj == 'type3':
-
         lr_adjust = {epoch: args.learning_rate if epoch <
-                     3 else args.learning_rate * (0.8 ** ((epoch - 3) // 1))}
+                     3 else args.learning_rate * (0.7 ** ((epoch - 3) // 1))}
     elif args.lradj == 'PEMS':
         lr_adjust = {epoch: args.learning_rate * (0.95 ** (epoch // 1))}
     elif args.lradj == 'TST':
@@ -83,12 +82,12 @@ class EarlyStopping:
             else:
                 print(
                     f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-
-        if self.accelerator is not None:
-            model = self.accelerator.unwrap_model(model)
-            torch.save(model.state_dict(), path + '/' + 'checkpoint')
-        else:
-            torch.save(model.state_dict(), path + '/' + 'checkpoint')
+        # for now we don't save since we don't use pretrained models
+        # if self.accelerator is not None:
+        #     model = self.accelerator.unwrap_model(model)
+        #     torch.save(model.state_dict(), path + '/' + 'checkpoint')
+        # else:
+        #     torch.save(model.state_dict(), path + '/' + 'checkpoint')
         self.val_loss_min = val_loss
 
 
