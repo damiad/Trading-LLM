@@ -343,7 +343,27 @@ class Dataset_AAPL(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  data_path='AAPL.csv',
                  target='Close', scale=True, timeenc=0, freq='d',
-                 seasonal_patterns=None, to_remove=[], date_col='Date', seq_step=1):
+                 seasonal_patterns=None, to_remove=['Open', 'High', 'Low', 'Adj Close', 'Volume'], date_col='Date', seq_step=1):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, seq_step=seq_step)
+        
+class Dataset_GBPTRY_hour(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='GBPTRY_ONE_HOUR.csv',
+                 target='close', scale=True, timeenc=0, freq='h',
+                 seasonal_patterns=None, to_remove=['open','low','high','ask_open','ask_close','ask_low','ask_high','usdPerPips'], 
+                 date_col='barTimestamp', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
+        
+class Dataset_BTCUSD_hour(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='BTCUSD_ONE_HOUR.csv',
+                 target='close', scale=True, timeenc=0, freq='h',
+                 seasonal_patterns=None, to_remove=['open','low','high','ask_open','ask_close','ask_low','ask_high','usdPerPips'], 
+                 date_col='barTimestamp', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)

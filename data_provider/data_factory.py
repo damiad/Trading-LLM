@@ -1,4 +1,4 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_GBPCAD_hour, Dataset_Sine_01, Dataset_NUMSOLD_day, Dataset_EURUSD_hour, Dataset_AAPL
+from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_GBPCAD_hour, Dataset_BTCUSD_hour, Dataset_Sine_01, Dataset_NUMSOLD_day, Dataset_EURUSD_hour, Dataset_AAPL, Dataset_GBPTRY_hour
 from torch.utils.data import DataLoader
 
 data_dict = {
@@ -12,6 +12,8 @@ data_dict = {
     'numsold' : Dataset_NUMSOLD_day,
     'eurusd' : Dataset_EURUSD_hour,
     'aapl' : Dataset_AAPL,
+    'gbptry' : Dataset_GBPTRY_hour,
+    'btcusd' : Dataset_BTCUSD_hour,
 }
 
 
