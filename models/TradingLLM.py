@@ -9,7 +9,7 @@ from layers.StandardNorm import Normalize
 import pandas_ta as ta
 import pandas as pd
 transformers.logging.set_verbosity_error()
-base_model_path = "/home/heorhii/zpp/Trading-LLM/llama-7b"
+base_model_path = "/home/zpp/Trading-LLM/llama-7b"
 
 
 class FlattenHead(nn.Module):
@@ -72,7 +72,7 @@ class Model(nn.Module):
             configs.d_model, self.patch_len, self.stride, configs.dropout)
 
         # TODO: uncomment and test
-        self.data_embedding = DataEmbedding(c_in=100, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
+        #self.data_embedding = DataEmbedding(c_in=100, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
 
         self.word_embeddings = self.llama.get_input_embeddings().weight
         self.vocab_size = self.word_embeddings.shape[0]

@@ -357,12 +357,51 @@ class Dataset_GBPTRY_hour(Dataset_Custom):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
+                 
+
+class Dataset_ETHUSD_hour(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='ETHUSD_ONE_HOUR.csv',
+                 # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 target='close', scale=True, timeenc=0, freq='h',
+                seasonal_patterns=None, to_remove=["open","low","high","ask_open","ask_close","ask_low","ask_high","usdPerPips"], 
+                 
+                 date_col='barTimestamp', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
         
 class Dataset_BTCUSD_hour(Dataset_Custom):
     def __init__(self, root_path, flag='train', size=None,
                  data_path='BTCUSD_ONE_HOUR.csv',
                  target='close', scale=True, timeenc=0, freq='h',
                  seasonal_patterns=None, to_remove=['open','low','high','ask_open','ask_close','ask_low','ask_high','usdPerPips'], 
+                 date_col='barTimestamp', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
+
+
+
+class Dataset_US500_hour(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='ETHUSD_ONE_HOUR.csv',
+                 # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 target='close', scale=True, timeenc=0, freq='h',
+                seasonal_patterns=None, to_remove=["open","low","high","ask_open","ask_close","ask_low","ask_high","usdPerPips"], 
+                 date_col='barTimestamp', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
+
+
+
+class Dataset_WEATHER_hour(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='ETHUSD_ONE_HOUR.csv',
+                 # ,open,close,low,high,volume,ask_open,ask_close,ask_low,ask_high
+                 target="mean_temp", scale=True, timeenc=0, freq='h',
+                 seasonal_patterns=None, to_remove=["cloud_cover","sunshine","global_radiation","max_temp","min_temp","precipitation","pressure","snow_depth"], 
                  date_col='barTimestamp', seq_step=1):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
