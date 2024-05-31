@@ -22,7 +22,7 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
         }
     elif args.lradj == 'type3':
         lr_adjust = {epoch: args.learning_rate if epoch <
-                     2 else args.learning_rate * (0.75 ** ((epoch - 2) // 1))}
+                     2 else args.learning_rate * (0.7 ** ((epoch - 2) // 1))}
     elif args.lradj == 'PEMS':
         lr_adjust = {epoch: args.learning_rate * (0.95 ** (epoch // 1))}
     elif args.lradj == 'TST':

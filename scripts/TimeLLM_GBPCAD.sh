@@ -1,22 +1,21 @@
 model_name=TradingLLM
 train_epochs=100
-learning_rate=0.02
+learning_rate=0.001
 llama_layers=32
 
 master_port=1234
 num_process=1
-batch_size=4 #24
+batch_size=5 
 d_model=32
 d_ff=128
-num_entries=20000
-seq_len=40
-pred_len=6
-seq_step=5
-cg_value=6
+num_entries=10000
+seq_len=300
+pred_len=60
+seq_step=6
 
 comment="${num_entries}-ending-${pred_len}by${seq_step}"
 
-python3 dataset/currencies/cut.py gbpcad tail $num_entries
+python3 dataset/currencies/cut.py gbpcad all $num_entries
 
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
 	--root_path ./dataset/currencies/ \
@@ -37,8 +36,8 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--llm_layers $llama_layers \
 	--train_epochs $train_epochs \
 	--model_comment $comment \
-	--lradj 'type1' \
-	--cg_value $cg_value \
+	--lradj 'type3' \
+	--cg_value $pred_len \
 	--patience 10
 
 # patience add
