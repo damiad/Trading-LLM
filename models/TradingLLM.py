@@ -9,7 +9,7 @@ from layers.StandardNorm import Normalize
 import pandas_ta as ta
 import pandas as pd
 transformers.logging.set_verbosity_error()
-base_model_path = "/home/zpp/Trading-LLM/llama-7b"
+base_model_path = "/home/heorhii/zpp/Trading-LLM/llama-7b"
 
 
 class FlattenHead(nn.Module):

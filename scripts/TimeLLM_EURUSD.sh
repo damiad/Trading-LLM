@@ -1,24 +1,24 @@
 model_name=TradingLLM
 train_epochs=100
-learning_rate=0.002
+learning_rate=0.001
 llama_layers=32
 
 master_port=1234
 num_process=1
-batch_size=6 #24
+batch_size=5 
 d_model=32
 d_ff=128
-num_entries=30000
-seq_len=60
-pred_len=7
-seq_step=7
-cg_value=7
+num_entries=10000
+seq_len=200
+pred_len=40
+seq_step=12
 
-comment="${num_entries}-ending-${pred_len}by${seq_step}-head-binary"
+comment="${num_entries}-ending-${pred_len}by${seq_step}-fixed"
 
-python3 dataset/currencies/cut.py eurusd head $num_entries
+python3 dataset/currencies/cut.py eurusd all $num_entries
 
-accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+# accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main_zero_grad.py \
 	--root_path ./dataset/currencies/ \
 	--data_path output.csv \
 	--model_id EURUSD \
@@ -37,8 +37,8 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--llm_layers $llama_layers \
 	--train_epochs $train_epochs \
 	--model_comment $comment \
-	--lradj 'type1' \
-	--cg_value $cg_value \
+	--lradj 'type3' \
+	--cg_value $pred_len \
 	--patience 10
 
 # patience add

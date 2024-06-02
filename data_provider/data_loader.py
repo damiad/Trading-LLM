@@ -205,8 +205,8 @@ class Dataset_Custom(Dataset):
         self.pred_len = size[2]
         self.seq_step = seq_step
 
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train': 0, 'val': 1, 'test': 2}
+        assert flag in ['train', 'test', 'val', 'entire']
+        type_map = {'train': 0, 'val': 1, 'test': 2, 'entire': 3}
         self.set_type = type_map[flag]
         self.target = target
         self.scale = scale
@@ -242,9 +242,9 @@ class Dataset_Custom(Dataset):
         num_train = int(len(df_raw) * 0.7)
         num_test = int(len(df_raw) * 0.2)
         num_vali = len(df_raw) - num_train - num_test
-        border1s = [0, num_train - self.seq_len,
-                    len(df_raw) - num_test - self.seq_len]
-        border2s = [num_train, num_train + num_vali, len(df_raw)]
+        border1s = [0, num_train - self.seq_len * self.seq_step,
+                    len(df_raw) - num_test - self.seq_len*self.seq_step, 0]
+        border2s = [num_train, num_train + num_vali, len(df_raw), len(df_raw)]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 

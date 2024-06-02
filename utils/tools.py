@@ -174,20 +174,27 @@ def predict(args, accelerator, model, vali_data, vali_loader, criterion, mae_met
 def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
-    metrics = Metrics(10, args.cg_value)  # maybe pass j as a parameter
+    metrics = Metrics(10, args.cg_value)  # maybe pass j as a parametervali
     model.eval()
     with torch.no_grad():
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
             batch_x = batch_x.float().to(accelerator.device)
-            batch_y = batch_y.float()
-
+            batch_y = batch_y.float().to(accelerator.device)
             batch_x_mark = batch_x_mark.float().to(accelerator.device)
             batch_y_mark = batch_y_mark.float().to(accelerator.device)
 
             # decoder input
-            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float()
-            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(
-                accelerator.device)
+            dec_inp = (
+                torch.zeros_like(batch_y[:, -args.pred_len:, :])
+                .float()
+                .to(accelerator.device)
+            )
+            dec_inp = (
+                torch.cat([batch_y[:, : args.label_len, :], dec_inp], dim=1)
+                .float()
+                .to(accelerator.device)
+            )
+
             # encoder - decoder
             if args.output_attention:
                 outputs = model(batch_x, batch_x_mark,
@@ -195,31 +202,20 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
             else:
                 outputs = model(batch_x, batch_x_mark,
                                 dec_inp, batch_y_mark)
-            # self.accelerator.wait_for_everyone()
+
             f_dim = 0
-
-            last_val = batch_x[:, -1, f_dim:].to(accelerator.device)
+            last_val = batch_x[:, -1, f_dim:]
             outputs = outputs[:, -args.pred_len:, f_dim:]
-            batch_y = batch_y[:, -args.pred_len:,
-                              f_dim:].to(accelerator.device)
-
-            #TODO: Same as in run_main.py (change in the rest of places too)
-            # Cropping because beggining may be unpredictible and we don't care about later records
-            # Obviously this could be param (if it will work), 
-            # we can also tell to model what to predict actually (prompt and dataloader)
-            # outputs = outputs[:, 7:12, :] 
-            # batch_y = batch_y[:, 7:12, :]
-            ###################################################################
+            batch_y = batch_y[:, -args.pred_len:, f_dim:]
 
             pred = outputs.detach()
             true = batch_y.detach()
             last_val = last_val.detach()
-
             loss = criterion(pred, true)
             mae_loss = mae_metric(pred, true)
 
-            metrics.append(last_val, outputs, batch_y)
-
+            # metrics.append(last_val, outputs, batch_y)
+            metrics.append(last_val, pred, true)
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
 

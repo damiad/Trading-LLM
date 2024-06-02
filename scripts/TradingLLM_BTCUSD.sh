@@ -5,7 +5,7 @@ llama_layers=32
 
 master_port=1234
 num_process=1
-batch_size=5 
+batch_size=3
 d_model=32
 d_ff=128
 num_entries=10000
@@ -13,11 +13,12 @@ seq_len=200
 pred_len=40
 seq_step=12
 
-comment="${num_entries}-ending-${pred_len}by${seq_step}"
+comment="${num_entries}-ending-${pred_len}by${seq_step}-v2-cheated"
 
 python3 dataset/currencies/cut.py btcusd all $num_entries
 
-accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+# accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main_zero_grad_v2.py \
 	--root_path ./dataset/currencies/ \
 	--data_path output.csv \
 	--model_id BTCUSD \
@@ -38,4 +39,4 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_comment $comment \
 	--lradj 'type3' \
 	--cg_value $pred_len \
-	--patience 15
+	--patience 10
