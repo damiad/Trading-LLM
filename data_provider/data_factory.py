@@ -17,7 +17,8 @@ data_dict = {
     'btcusd' : Dataset_BTCUSD_hour,
     'us500' : Dataset_US500_hour,
     'ethusd' : Dataset_ETHUSD_hour,
-    'weather' : Dataset_WEATHER_hour
+    'weather' : Dataset_WEATHER_hour,
+    'electricity' : Dataset_ELECTRICITY_hour,
 
 }
 

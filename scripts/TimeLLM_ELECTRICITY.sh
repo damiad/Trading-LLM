@@ -10,26 +10,25 @@ d_model=32
 d_ff=128
 num_entries=20000
 seq_len=100
-pred_len=15
-seq_step=8
-cg_value=15
+pred_len=6
+seq_step=11
+cg_value=6
 
+comment="ending-${pred_len}by${seq_step}-exp19-train"
 
-comment="${num_entries}-ending-${pred_len}by${seq_step}-exp23-test"
-
-python3 dataset/myexp/cut.py us500 head $num_entries
+python3 dataset/myexp/cut.py electricity tail $num_entries
 
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
 	--root_path ./dataset/myexp/ \
 	--data_path output.csv \
-	--model_id US500 \
+	--model_id ELECTRICITY \
 	--model $model_name \
-	--data us500 \
+	--data electricity \
 	--seq_len $seq_len \
 	--label_len 0 \
 	--pred_len $pred_len \
 	--seq_step $seq_step \
-	--target 'close' \
+	--target 'target' \
 	--itr 1 \
 	--d_model $d_model \
 	--d_ff $d_ff \
@@ -40,6 +39,6 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
 	--model_comment $comment \
 	--lradj 'type3' \
 	--cg_value $cg_value \
-	--patience 20
+	--patience 10
 
 # patience add
