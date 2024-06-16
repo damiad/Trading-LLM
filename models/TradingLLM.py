@@ -33,7 +33,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.seq_len = configs.seq_len
         self.d_ff = configs.d_ff
-        self.top_k = 5  # TODO: could be parameter, see forward and calculate lags
+        self.top_k = 5
         self.d_llm = 4096
         self.patch_len = configs.patch_len
         self.stride = configs.stride
@@ -70,10 +70,6 @@ class Model(nn.Module):
 
         self.patch_embedding = PatchEmbedding(
             configs.d_model, self.patch_len, self.stride, configs.dropout)
-
-        # TODO: uncomment and test
-        #self.data_embedding = DataEmbedding(c_in=100, d_model=configs.d_model, embed_type='fixed', freq='h', dropout=configs.dropout)
-
         self.word_embeddings = self.llama.get_input_embeddings().weight
         self.vocab_size = self.word_embeddings.shape[0]
         self.num_tokens = 1000
@@ -92,7 +88,6 @@ class Model(nn.Module):
         return dec_out[:, -self.pred_len:, :]
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
-        # TODO: reapeate this logic for all the columns, when given multiple columns in __getitem__
         x_enc = self.normalize_layers(x_enc, 'norm')
         B, T, N = x_enc.size()
         x_enc = x_enc.permute(0, 2, 1).contiguous().reshape(B * N, T, 1)
@@ -127,9 +122,6 @@ class Model(nn.Module):
             lowerband = bbands['BBU_' + str(length) + '_2.0'].iloc[-1]
             del df
 
-            # print("RSI: ", rsi_value)
-            # print("MACD: ", macd_value)
-            # print("BBANDS: ", upperband, middleband, lowerband)
             last_3_values_str = [str(value.tolist())
                                  for value in x_enc[b, -3:, 0]]
 
@@ -141,7 +133,6 @@ class Model(nn.Module):
                 f"max value {max_values_str}, "
                 f"median value {median_values_str}, "
                 f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
-                # f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
                 f"top {self.top_k} lags are : {lags_values_str}, "
                 f"RSI value: {rsi_value:.2f}, "
                 f"MACD value: {macd_value:.2f}, "
@@ -160,8 +151,6 @@ class Model(nn.Module):
         
         x_enc = x_enc.permute(0, 2, 1).contiguous()
         enc_out, n_vars = self.patch_embedding(x_enc.to(torch.bfloat16))
-        # TODO: uncomment and test
-        # enc_out, n_vars = self.data_embedding(x_enc.to(torch.bfloat16), x_mark_enc.to(torch.bfloat16))
         enc_out = self.reprogramming_layer(
             enc_out, source_embeddings, source_embeddings)
         llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)

@@ -107,8 +107,6 @@ for ii in range(args.itr):
         )
 
     criterion = nn.MSELoss()
-    # criterion = nn.BCELoss()
-    # criterion = nn.L1Loss()
     mae_metric = nn.L1Loss()
 
     train_data, train_loader, vali_loader, test_loader, model, model_optim, scheduler = (
@@ -159,22 +157,6 @@ for ii in range(args.itr):
             last_vals = batch_x[:, -1, f_dim:]
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:, f_dim:]
-
-            # ! Binary convertion:
-            # outputs_b = (outputs > last_vals.unsqueeze(1).repeat(1, args.pred_len, 1)).float()
-            # batch_y_b = (batch_y > last_vals.unsqueeze(1).repeat(1, args.pred_len, 1)).float()
-            # criterion = nn.BCELoss()
-            # loss = criterion(outputs_b, batch_y_b)
-            # outputs_b.detach()
-            # batch_y_b.detach()
-            # Uncomment above to use binary loss - and comment out loss = criterion(outputs, batch_y)
-
-            # TODO: Cropping because beggining may be unpredictible and we don't care about later records
-            # Obviously this could be param (if it will work),
-            # we can also tell to model what to predict actually (prompt and dataloader)
-            # outputs = outputs[:, 7:12, :]
-            # batch_y = batch_y[:, 7:12, :]
-            ###################################################################
 
             loss = criterion(outputs, batch_y)
             train_loss.append(loss.item())

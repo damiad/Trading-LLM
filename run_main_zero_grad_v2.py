@@ -158,7 +158,7 @@ for ii in range(args.itr):
             batch_y.detach()
             train_cg_loss.append(CG_arr(last_vals, outputs, batch_y))
 
-            # Without it our accuracy isn't such extreme! - TODO: test theory
+            # Without it our accuracy isn't such extreme!
             accelerator.backward(loss)
             model_optim.step()
             if args.lradj == "TST":

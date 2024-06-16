@@ -29,7 +29,6 @@ def data_provider(args, flag):
     if flag == 'test':
         shuffle_flag = False
     else:
-        # shuffle_flag = True //TODO: why not true?
         shuffle_flag = False
 
 

@@ -19,14 +19,6 @@ class Metrics:
         self.cgi = []
         self.mape = []
     def append(self, last_val, pred, true):
-        #has to be written in torch not np
-        # self.rse.append(RSE(pred, true))
-        # self.corr.append(CORR(pred, true))
-        # self.mae.append(MAE(pred, true))
-        # self.mse.append(MSE(pred, true))
-        # self.rmse.append(RMSE(pred, true))
-        # self.mape.append(MAPE(pred, true))
-        # self.mspe.append(MSPE(pred, true))
         self.cg.append(CG_arr(last_val, pred, true))
         self.cgd.append(CGD(last_val, pred, true))
         self.cgi.append(CGI(self.j, last_val, pred, true))
@@ -119,7 +111,6 @@ def CGD(last_val, pred, true):
     pred_deltas = torch.sign(pred - pred_last)
     true_deltas = torch.sign(true - true_last)
     count = torch.sum(pred_deltas == true_deltas)
-    # return count.item()
     return count.item() / pred_deltas.numel()
 
 #next we define accuracy as  

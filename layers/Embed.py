@@ -106,7 +106,7 @@ class TimeFeatureEmbedding(nn.Module):
         return self.embed(x)
 
 
-class DataEmbedding(nn.Module): #TODO: try using this one (c_in could be 7)
+class DataEmbedding(nn.Module):
     def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
         super(DataEmbedding, self).__init__()
 
@@ -118,14 +118,13 @@ class DataEmbedding(nn.Module): #TODO: try using this one (c_in could be 7)
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
-        n_vars = x.shape[1] # Added this line
+        n_vars = x.shape[1]
         if x_mark is None:
             x = self.value_embedding(x) + self.position_embedding(x).to(x.device)
         else:
             x = self.value_embedding(
                 x) + self.temporal_embedding(x_mark) + self.position_embedding(x)
-        # return self.dropout(x)
-        return self.dropout(x), n_vars # Our change
+        return self.dropout(x), n_vars
 
 
 class DataEmbedding_wo_pos(nn.Module):
