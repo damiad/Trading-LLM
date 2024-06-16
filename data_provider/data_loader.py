@@ -395,3 +395,14 @@ class Dataset_WEATHER_hour(Dataset_Custom):
 
         super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
                          seasonal_patterns=seasonal_patterns, to_remove=to_remove, date_col=date_col, do_shift=True, seq_step=seq_step)
+        
+
+class Dataset_ELECTRICITY_hour(Dataset_Custom):
+    def __init__(self, root_path, flag='train', size=None,
+                 data_path='electricity.csv',
+                 target='target', scale=True, timeenc=0, freq='h',
+                seasonal_patterns=None, 
+                 date_col='date', seq_step=1):
+
+        super().__init__(root_path, flag=flag, size=size, data_path=data_path, target=target, scale=scale, timeenc=timeenc, freq=freq,
+                         seasonal_patterns=seasonal_patterns, date_col=date_col, do_shift=True, seq_step=seq_step)
