@@ -3,7 +3,7 @@ from accelerate import Accelerator, DeepSpeedPlugin
 from torch import nn, optim
 from torch.optim import lr_scheduler
 
-from models import TimeLLM, TradingLLM
+from models import TradingLLM
 
 from data_provider.data_factory import data_provider
 import random
@@ -40,7 +40,7 @@ for ii in range(1):
     if args.model == 'TradingLLM':
         model = TradingLLM.Model(args).float()
     else:
-        model = TimeLLM.Model(args).float()
+        raise ValueError('Model not supported')
 
     args.content = load_content(args)
 

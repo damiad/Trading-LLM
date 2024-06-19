@@ -1,20 +1,9 @@
 <div align="center">
-  <h2><b> Trading-LLM: Trading Series Forecasting by Reprogramming Large Language Models </b></h2>
+  <h2><b> Trading-LLM: Forex Series Forecasting by Reprogramming Large Language Models </b></h2>
 </div>
 
----
->
-> 🙋 Please let us know if you find out a mistake or have any suggestions!
-> 
-> 🌟 If you find this resource helpful, please consider to star this repository and cite our research:
-
-```
-  authors={Damian Dąbrowski, Ivan Gechu, Heorhii Lopatin, Krzysztof Szostek},
-  year={2024}
-```
-
 ## Introduction
-Time-LLM is a reprogramming framework to repurpose LLMs for general time series forecasting with the backbone language models kept intact.
+Trading-LLM is a reprogramming framework to repurpose LLMs for general time series forecasting with the backbone language models kept intact.
 Notably, we show that time series analysis (e.g., forecasting) can be cast as yet another "language task" that can be effectively tackled by an off-the-shelf LLM.
 
 <p align="center">
@@ -28,96 +17,43 @@ Notably, we show that time series analysis (e.g., forecasting) can be cast as ye
 </p>
 
 ## Requirements
-- accelerate==0.20.3
-- einops==0.7.0
-- matplotlib==3.7.0
-- numpy==1.23.5
-- pandas==1.5.3
-- scikit_learn==1.2.2
-- scipy==1.5.4
-- torch==2.0.1
-- tqdm==4.65.0
-- peft==0.4.0
-- transformers==4.31.0
-- deepspeed==0.13.0
-- bitsandbytes
-- datasets
-- sentencepiece
-- mpi4py
+- accelerate>=0.20.3
+- einops>=0.7.0
+- matplotlib>=3.7.0
+- numpy>=1.23.5
+- pandas>=1.5.3
+- pandas_ta>=0.3.14b0
+- scikit_learn>=1.2.2
+- scipy>=1.5.4
+- torch>=2.0.1
+- tqdm>=4.65.0
+- peft>=0.4.0
+- transformers>=4.31.0
+- deepspeed>=0.13.0
+- bitsandbytes>=0.43.1
+- datasets>=2.19.0
+- sentencepiece>=0.2.0
+- mpi4py>=3.1.6
+- matplotlib
+- torchmetrics
+- sklearn
 
 To install all dependencies:
 ```
 pip install -r requirements.txt
 ```
 
-## Datasets
-You can access the well pre-processed datasets from [[Google Drive]](LINK_LATER), then place the downloaded contents under `./dataset`
-
 ## Quick Demos
-1. Download datasets and place them under `./dataset`
-2. Tune the model. We provide five experiment scripts for demonstration purpose under the folder `./scripts`. For example, you can evaluate on ETT datasets by:
+1. Place datasets them under `./dataset`
+2. If not done yet, go to `./data_provider` to add dataloader, look at `DatasetCustom`.
+3. Tune the model. Write script to run the model in `./scripts`.
+4. Run the script. For example, to run the model on AAPL dataset:
 
 ```bash
-bash ./scripts/TimeLLM_ETTh1.sh 
+bash ./scripts/TradingLLM_AAPL.sh 
 ```
-```bash
-bash ./scripts/TimeLLM_ETTh2.sh 
-```
-```bash
-bash ./scripts/TimeLLM_ETTm1.sh 
-```
-```bash
-bash ./scripts/TimeLLM_ETTm2.sh
-```
+5. The results will be saved in `./checkpoints`.
 
 ## Detailed usage
 
 Please refer to ```run_main.py``` for the detailed description of each hyperparameter.
-
-
-## Further Reading
-1, [**Large Models for Time Series and Spatio-Temporal Data: A Survey and Outlook**](https://arxiv.org/abs/2310.10196), in *arXiv* 2023.
-[\[GitHub Repo\]](https://github.com/qingsongedu/Awesome-TimeSeries-SpatioTemporal-LM-LLM)
-
-**Authors**: Ming Jin, Qingsong Wen*, Yuxuan Liang, Chaoli Zhang, Siqiao Xue, Xue Wang, James Zhang, Yi Wang, Haifeng Chen, Xiaoli Li (IEEE Fellow), Shirui Pan*, Vincent S. Tseng (IEEE Fellow), Yu Zheng (IEEE Fellow), Lei Chen (IEEE Fellow), Hui Xiong (IEEE Fellow)
-
-
-```bibtex
-@article{jin2023lm4ts,
-  title={Large Models for Time Series and Spatio-Temporal Data: A Survey and Outlook}, 
-  author={Ming Jin and Qingsong Wen and Yuxuan Liang and Chaoli Zhang and Siqiao Xue and Xue Wang and James Zhang and Yi Wang and Haifeng Chen and Xiaoli Li and Shirui Pan and Vincent S. Tseng and Yu Zheng and Lei Chen and Hui Xiong},
-  journal={arXiv preprint arXiv:2310.10196},
-  year={2023}
-}
-```
-
-2, [**Position Paper: What Can Large Language Models Tell Us about Time Series Analysis**](https://arxiv.org/abs/2402.02713), in *arXiv* 2024.
-
-**Authors**: Ming Jin, Yifan Zhang, Wei Chen, Kexin Zhang, Yuxuan Liang*, Bin Yang, Jindong Wang, Shirui Pan, Qingsong Wen*
-
-
-```bibtex
-@article{jin2024position,
-   title={Position Paper: What Can Large Language Models Tell Us about Time Series Analysis}, 
-   author={Ming Jin and Yifan Zhang and Wei Chen and Kexin Zhang and Yuxuan Liang and Bin Yang and Jindong Wang and Shirui Pan and Qingsong Wen},
-  journal={arXiv preprint arXiv:2402.02713},
-  year={2024}
-}
-```
-3, [**Transformers in Time Series: A Survey**](https://arxiv.org/abs/2202.07125), in IJCAI 2023.
-[\[GitHub Repo\]](https://github.com/qingsongedu/time-series-transformers-review)
-
-**Authors**: Qingsong Wen, Tian Zhou, Chaoli Zhang, Weiqi Chen, Ziqing Ma, Junchi Yan, Liang Sun
-
-```bibtex
-@inproceedings{wen2023transformers,
-  title={Transformers in time series: A survey},
-  author={Wen, Qingsong and Zhou, Tian and Zhang, Chaoli and Chen, Weiqi and Ma, Ziqing and Yan, Junchi and Sun, Liang},
-  booktitle={International Joint Conference on Artificial Intelligence(IJCAI)},
-  year={2023}
-}
-```
-
-
-## Acknowledgement
-Our implementation adapts [Time-Series-Library](https://github.com/thuml/Time-Series-Library) and [GPT4TS](https://github.com/DAMO-DI-ML/NeurIPS2023-One-Fits-All) as the code base and have extensively modified it to our purposes. We thank the authors for sharing their implementations and related resources.

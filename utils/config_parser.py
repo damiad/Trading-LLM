@@ -9,8 +9,8 @@ def get_args():
                         default='test', help='model id')
     parser.add_argument('--model_comment', type=str, required=True,
                         default='none', help='prefix when saving test results')
-    parser.add_argument('--model', type=str, required=True, default='TimeLLM',
-                        help='model name, options: [TimeLLM, TradingLLM]')
+    parser.add_argument('--model', type=str, required=True, default='TradingLLM',
+                        help='model name, options: [TradingLLM]')
     parser.add_argument('--seed', type=int, default=2021, help='random seed')
 
     # data loader
