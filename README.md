@@ -3,20 +3,12 @@
 </div>
 
 ## Introduction
+
 Trading-LLM is a reprogramming framework to repurpose LLMs for general time series forecasting with the backbone language models kept intact.
 Notably, we show that time series analysis (e.g., forecasting) can be cast as yet another "language task" that can be effectively tackled by an off-the-shelf LLM.
 
-<p align="center">
-<img src="./figures/framework.png" height = "360" alt="" align=center />
-</p>
-
-- Time-LLM comprises two key components: (1) reprogramming the input time series into text prototype representations that are more natural for the LLM, and (2) augmenting the input context with declarative prompts (e.g., domain expert knowledge and task instructions) to guide LLM reasoning.
-
-<p align="center">
-<img src="./figures/method-detailed-illustration.png" height = "190" alt="" align=center />
-</p>
-
 ## Requirements
+
 - accelerate>=0.20.3
 - einops>=0.7.0
 - matplotlib>=3.7.0
@@ -39,21 +31,24 @@ Notably, we show that time series analysis (e.g., forecasting) can be cast as ye
 - sklearn
 
 To install all dependencies:
+
 ```
 pip install -r requirements.txt
 ```
 
 ## Quick Demos
+
 1. Place datasets them under `./dataset`
 2. If not done yet, go to `./data_provider` to add dataloader, look at `DatasetCustom`.
 3. Tune the model. Write script to run the model in `./scripts`.
 4. Run the script. For example, to run the model on AAPL dataset:
 
 ```bash
-bash ./scripts/TradingLLM_AAPL.sh 
+bash ./scripts/TradingLLM_AAPL.sh
 ```
+
 5. The results will be saved in `./checkpoints`.
 
 ## Detailed usage
 
-Please refer to ```run_main.py``` for the detailed description of each hyperparameter.
+Please refer to `run_main.py` for the detailed description of each hyperparameter.
